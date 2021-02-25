@@ -1,0 +1,136 @@
+<html>
+    <head>
+        <title>The ultimate Xitem Web Console</title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+        <style>
+            * { margin: 0; padding: 0; box-sizing: border-box;}
+            body { font: 13px Helvetica, Arial; background-color:black;}
+            #messages { list-style-type: none; margin: 0; padding: 0; }
+            .footer {position: fixed; left: 0; bottom: 0; width: 100%; background-color: #202020; text-align: center;}
+          </style>
+        
+    </head>
+    <body >
+        <div class="row" style="margin: 10px">
+            <div class="col-sm-9" style="padding: 0px">
+                    <input type="text" id="user-token" class="form-control" placeholder="Bitte Schlüssel eingeben ^-^">
+            </div>
+            <div class="col-sm-3" style="padding-left: 10px">
+                    <button type="button" class="btn btn-primary" onclick="initSocket()" style="width: 100%;">Verbinden</button><br>
+            </div>
+        </div>
+        <div class="row" style="margin: 10px">
+            <ul id="messages"></ul>
+        </div>
+        <div class="footer">
+            <div class="row" style="margin: 10px">
+                <div class="col-sm-9" style="padding: 0px">
+                        <input type="text" id="cmd" class="form-control" placeholder="">
+                </div>
+                <div class="col-sm-3" style="padding-left: 10px">
+                        <button type="button" class="btn btn-primary" onclick="send()" style="width: 100%;">Ausführen</button><br>
+                </div>
+            </div>
+        </div>
+        <script>
+            var socket;
+
+            function login() {
+                var command = document.getElementById("cmd").value
+
+                if(socket) {
+                    if(socket.connected) {
+                        socket.emit("cmd",command);
+                    }
+                }
+            }
+
+            function send() {
+                var command = document.getElementById("cmd").value
+
+                if(socket) {
+                    if(socket.connected) {
+                        socket.emit("cmd",command);
+                    }
+                }
+            }
+
+            function initSocket() {
+
+                if(socket) {
+                    if(socket.connected) {
+                        socket.disconnect();
+                    }
+                }
+                
+                socket = io.connect( "https://api.xitem.de", {
+                    path : "/logging",
+                    transportOptions: {
+                        polling: {
+                            extraHeaders: {
+                                "user-token": document.getElementById("user-token").value
+                            }
+                        }
+                    }
+                });
+
+                socket.on('error', function(data){
+                    appendMsg("darkred", "Error:" + data);
+                });
+
+                socket.on('connect_error', function(data) {
+                    appendMsg("darkred", "Connection Error: " + data);
+                })
+
+                socket.on('connect_timeout', function() {
+                    appendMsg("darkred", "Connection timeout!");
+                })
+
+                socket.on('disconnect', function(){
+                    appendMsg("darkorange", "Connection closed!");
+                });
+
+                socket.on('reconnecting', function(data){
+                    appendMsg("darkorange", "Reconnecting... (" + data + ")");
+                });
+
+                socket.on('reconnect', function(data){
+                    appendMsg("limegreen", "Reconnected! ♥");
+                });
+
+                socket.on('reconnect_failed', function(){
+                    appendMsg("darkred", "Reconnect failed!");
+                });
+
+                socket.on('reconnect_error', function(data){
+                    appendMsg("darkred", "Error:" + data);
+                });
+
+                socket.on('log', function(data){
+                    appendMsg("limegreen", data.msg);
+                });
+
+                socket.on('err', function(data){
+                    appendMsg("red", data.msg);
+                });
+            }
+
+            function appendMsg(color, msg) {
+                console.log("new log");
+
+                bottom = false;
+                if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
+                    bottom = true
+                }
+
+                $('#messages').append($('<li style="color:' + color + ';">').text(msg));
+
+                if(bottom) {
+                    window.scrollTo(0,document.body.scrollHeight);
+                }
+            }
+        </script>
+    </body>
+</html>
