@@ -435,7 +435,7 @@ class CalendarController {
             associatedUser.calendar_id = calendar.calendar_id;
             associatedUser.user_id = userPayload.user_id;
             associatedUser.is_owner = false;
-            associatedUser.can_create_events = false;
+            associatedUser.can_create_events = true;
             associatedUser.can_edit_events = false;
 
             if(requestParams.color) 

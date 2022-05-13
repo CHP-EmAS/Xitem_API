@@ -193,7 +193,7 @@ class VotingController {
         //get all associated users form the calendar
         const isMember = await CalendarController.isCalendarMember(requested_calendar_id, userPayload.user_id);
         if(isMember == null) return response.status(403).json(toObj(response, {Error: customError.accessForbidden}));
-        if(!isMember.is_owner) return response.status(403).json(toObj(response, {Error: customError.insufficientPermissions}));
+        if(!isMember.can_edit_events || !isMember.is_owner) return response.status(403).json(toObj(response, {Error: customError.insufficientPermissions}));
 
         let voting = new CalendarVotingModel();
 

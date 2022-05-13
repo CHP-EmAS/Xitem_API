@@ -25,15 +25,16 @@ export const authProtected = async (request: Request, response: Response, next: 
 
   if(localPayload instanceof Error) {
 
+    //auth token could not be verified
     return response.status(401).json(toObj(response,{Error: localPayload.message}));
 
   } else {
 
-    //store jwt in locals
+    //store jwt informations in locals
     response.locals.userPayload = localPayload;
 
+    //rufe nächste 
     next();
-
   }
 };
 

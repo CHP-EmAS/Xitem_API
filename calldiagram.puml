@@ -1,0 +1,451 @@
+@startuml
+class UserRoleModel extends Model {
+    +role_name: string
+    +description: string
+    +full_name: string
+    +hierarchy_level: number
+}
+class CalendarModel extends Model {
+    +calendar_id: string
+    +calendar_name: string
+    -hash_passwd: string
+    +can_join: boolean
+    +creation_date: Date
+    +hashPassword(password: string): void
+    +checkIfUnencryptedPasswordIsValid(unencryptedPassword: string): boolean
+}
+enum StateCode {
+    BadenWürttemberg
+    Bayern
+    Berlin
+    Brandenburg
+    Bremen
+    Hamburg
+    Hessen
+    MecklenburgVorpommern
+    Niedersachsen
+    NordrheinWestfalen
+    RheinlandPfalz
+    Saarland
+    Sachsen
+    SachsenAnhalt
+    SchleswigHolstein
+    Thüringen
+}
+class HolidayController {
+    -{static} cachedHolidayYears: Map<number, Map<StateCode, PublicHoliday[]>>
+    -{static} calculatePublicHolidays(year: number, stateCode: StateCode): PublicHoliday[]
+    +{static} getHolidays(request: Request<ParamsDictionary, any, any, QueryString.ParsedQs, Record<string, any>>, response: Response<any, Record<string, any>>): Promise<Response<any, Record<string, any>>>
+}
+interface EditUserInterface {
+    +name?: string | undefined
+    +birthday?: Date | undefined
+}
+interface FilterUserInterface {
+    +search: string
+    +limit: number
+}
+interface RegistrationInterface {
+    +email: string
+    +name: string
+    +birthday?: Date | undefined
+}
+interface LoginInterface {
+    +email: string
+    +password: string
+}
+interface ValidationEmailInterface {
+    +validation_key: string
+    +password: string
+    +repeat_password: string
+}
+interface ChangePasswordInterface {
+    +old_password: string
+    +new_password: string
+    +repeat_password: string
+}
+interface ResetPasswordInterface {
+    +recovery_key: string
+    +new_password: string
+    +repeat_password: string
+}
+interface AccountDeletionInterface {
+    +deletion_key: string
+    +password: string
+}
+interface JWTPayloadInterface {
+    +user_id: string
+    +iat?: number | undefined
+    +exp?: number | undefined
+}
+interface LocalPayloadInterface {
+    +user_id: string
+    +name: string
+    +role: UserRoleModel
+}
+interface JWTEmailVerificationInterface {
+    +email: string
+    +name: string
+    +birthday?: Date | undefined
+    +iat?: number | undefined
+    +exp?: number | undefined
+}
+interface JWTPasswordRecoveryInterface {
+    +user_id: string
+    +iat?: number | undefined
+    +exp?: number | undefined
+}
+interface JWTAccountDeletionInterface {
+    +user_id: string
+    +iat?: number | undefined
+    +exp?: number | undefined
+}
+interface JWTCalendarInvitationInterface {
+    +calendar_id: string
+    +can_create_events: boolean
+    +can_edit_events: boolean
+    +iat?: number | undefined
+    +exp?: number | undefined
+}
+interface CreateCalendarInterface {
+    +title: string
+    +password: string
+    +can_join: boolean
+    +color?: number | undefined
+    +icon?: number | undefined
+}
+interface EditCalendarInterface {
+    +title?: string | undefined
+    +can_join?: boolean | undefined
+    +password?: string | undefined
+}
+interface AssociatedCalendarInterface {
+    +calendarObject: CalendarModel
+    +is_owner: boolean
+    +can_create_events: boolean
+    +can_edit_events: boolean
+    +color: number
+    +icon: number
+}
+interface AssociatedUserInterface {
+    +user_id: string
+    +is_owner: boolean
+    +can_create_events: boolean
+    +can_edit_events: boolean
+}
+interface PatchAssociatedUserInterface {
+    +is_owner?: boolean | undefined
+    +can_create_events?: boolean | undefined
+    +can_edit_events?: boolean | undefined
+}
+interface PatchCalendarLayoutInterface {
+    +color: number
+    +icon: number
+}
+interface AddAssociatedUserInterface {
+    +password: string
+    +password: string
+    +color?: number | undefined
+    +color?: number | undefined
+    +icon?: number | undefined
+    +icon?: number | undefined
+}
+interface AddAssociatedUserInterface {
+    +password: string
+    +password: string
+    +color?: number | undefined
+    +color?: number | undefined
+    +icon?: number | undefined
+    +icon?: number | undefined
+}
+interface GenerateInvitationTokenInterface {
+    +can_create_events: boolean
+    +can_edit_events: boolean
+    +expire: number
+}
+interface VerifyInvitationInterface {
+    +invitation_token: string
+    +color?: number | undefined
+    +icon?: number | undefined
+}
+interface GetEventPeriodInterface {
+    +begin_date: Date
+    +end_date: Date
+}
+interface CreateEventInterface {
+    +begin_date: Date
+    +end_date: Date
+    +title: string
+    +daylong: boolean
+    +description?: string | undefined
+    +color?: number | undefined
+    +pinned_note?: number | undefined
+}
+interface EditEventInterface {
+    +begin_date?: Date | undefined
+    +end_date?: Date | undefined
+    +title?: string | undefined
+    +description?: string | undefined
+    +daylong?: boolean | undefined
+    +color?: number | undefined
+    +pinned_note?: number | undefined
+}
+interface VotingInterface {
+    +voting_id: number
+    +owner_id: string
+    +title: string
+    +abstention_allowed: Boolean
+    +multiple_choice: Boolean
+    +userHasVoted: Boolean
+    +userVotedFor: number[]
+    +numberUsersWhoHaveVoted: number
+    +choices: VotingChoiceInterface[]
+    +creation_date: Date
+}
+interface VotingChoiceInterface {
+    +choice_id: number
+    +date: Date | null
+    +comment: string | null
+    +amountVotes: number
+}
+interface CreateVotingInterface {
+    +title: string
+    +multiple_choice: Boolean
+    +abstention_allowed: Boolean
+    +choices: AddVotingChoiceInterface[]
+}
+interface AddVotingChoiceInterface {
+    +date: Date
+    +comment: string
+}
+interface VoteInterface {
+    +choice_ids: number[]
+}
+interface CreateNoteInterface {
+    +title: string
+    +content: string
+    +color: number
+    +pinned: boolean
+}
+interface EditNoteInterface {
+    +title?: string | undefined
+    +content?: string | undefined
+    +color?: number | undefined
+    +pinned?: boolean | undefined
+}
+interface PublicHoliday {
+    +name: string
+    +date: Date
+}
+enum Roles {
+    SystemAdministrator
+    Administrator
+    Verified
+    Unverified
+    Readonly
+}
+enum Comparisons {
+    isGreaterThan
+    isLessThan
+    isGreaterOrEqualThan
+    isLessOrEqualThan
+}
+class roleCheck {
+    -{static} chachedRoles: Map<String, UserRoleModel>
+    -{static} getRole(roleName: string): Promise<UserRoleModel | null>
+    -{static} getUserRole(user_id: string): Promise<UserRoleModel | null>
+    +{static} isEqualTo(roles: Roles[]): (request: Request, response: Response, next: NextFunction) => Promise<Response<any, Record<string, any>> | undefined>
+    +{static} compare(comparison: Comparisons, role: Roles): (request: Request, response: Response, next: NextFunction) => Promise<void | Response<any, Record<string, any>>>
+}
+class UserModel extends Model {
+    +user_id: string
+    +email: string
+    +name: string
+    -hash_passwd: string
+    +password_changed_at: Date
+    +birthday: Date | null
+    +active: boolean
+    +role: string
+    +roleObject: UserRoleModel
+    +registered_at: Date
+    +hashPassword(password: string): void
+    +checkIfUnencryptedPasswordIsValid(unencryptedPassword: string): boolean
+}
+enum TokenType {
+    Authentication
+    Refresh
+    Security
+}
+class CalendarUserLinkModel extends Model {
+    +calendar_id: string
+    +user_id: string
+    +is_owner: boolean
+    +can_create_events: boolean
+    +can_edit_events: boolean
+    +color: number
+    +icon: number
+    +calendarObject: CalendarModel
+}
+class CalendarController {
+    +{static} getCalendarInfo(request: Request<ParamsDictionary, any, any, QueryString.ParsedQs, Record<string, any>>, response: Response<any, Record<string, any>>): Promise<Response<any, Record<string, any>> | undefined>
+    +{static} createCalendar(request: Request<ParamsDictionary, any, any, QueryString.ParsedQs, Record<string, any>>, response: Response<any, Record<string, any>>): Promise<Response<any, Record<string, any>>>
+    +{static} editCalendar(request: Request<ParamsDictionary, any, any, QueryString.ParsedQs, Record<string, any>>, response: Response<any, Record<string, any>>): Promise<Response<any, Record<string, any>> | undefined>
+    +{static} deleteCalendar(request: Request<ParamsDictionary, any, any, QueryString.ParsedQs, Record<string, any>>, response: Response<any, Record<string, any>>): Promise<Response<any, Record<string, any>>>
+    +{static} getAllAssociatedUsers(request: Request<ParamsDictionary, any, any, QueryString.ParsedQs, Record<string, any>>, response: Response<any, Record<string, any>>): Promise<Response<any, Record<string, any>>>
+    +{static} getAssociatedUser(request: Request<ParamsDictionary, any, any, QueryString.ParsedQs, Record<string, any>>, response: Response<any, Record<string, any>>): Promise<Response<any, Record<string, any>>>
+    +{static} patchAssociatedUser(request: Request<ParamsDictionary, any, any, QueryString.ParsedQs, Record<string, any>>, response: Response<any, Record<string, any>>): Promise<Response<any, Record<string, any>>>
+    +{static} patchCalendarLayout(request: Request<ParamsDictionary, any, any, QueryString.ParsedQs, Record<string, any>>, response: Response<any, Record<string, any>>): Promise<Response<any, Record<string, any>>>
+    +{static} addAssociatedUser(request: Request<ParamsDictionary, any, any, QueryString.ParsedQs, Record<string, any>>, response: Response<any, Record<string, any>>): Promise<Response<any, Record<string, any>>>
+    +{static} removeAssociatedUser(request: Request<ParamsDictionary, any, any, QueryString.ParsedQs, Record<string, any>>, response: Response<any, Record<string, any>>): Promise<Response<any, Record<string, any>>>
+    +{static} generateInvitationToken(request: Request<ParamsDictionary, any, any, QueryString.ParsedQs, Record<string, any>>, response: Response<any, Record<string, any>>): Promise<Response<any, Record<string, any>>>
+    +{static} verifyInvitationToken(request: Request<ParamsDictionary, any, any, QueryString.ParsedQs, Record<string, any>>, response: Response<any, Record<string, any>>): Promise<Response<any, Record<string, any>>>
+    +{static} isCalendarMember(calendar_id: string, user_id: string): Promise<AssociatedUserInterface | null>
+    +{static} divideCalendarName(calendar_name: string): { name: string; hash: number; } | null
+    -{static} associatedUsers(calendar_id: string): Promise<AssociatedUserInterface[] | null>
+    -{static} createCalendarName(calendar_name: string): Promise<string | null>
+}
+class NoteModel extends Model {
+    +note_id: number
+    +associated_calendar: string
+    +title: string
+    +color: number
+    +pinned: boolean
+    +content: string
+    +owner_id: string | null
+    +creation_date: Date
+    +modification_date: Date
+    +createdBy: UserModel
+    +calendarObject: CalendarModel
+}
+class EventModel extends Model {
+    +event_id: number
+    +begin_date: Date
+    +end_date: Date
+    +title: string
+    +description: string | null
+    +color: number
+    +created_by_user: string | null
+    +associated_calendar: string
+    +daylong: boolean
+    +pinned_note: number | null
+    +createdBy: UserModel
+    +calendarObject: CalendarModel
+    +noteObject: NoteModel
+    +creation_date: Date
+}
+class EventController {
+    +{static} getEventInfo(request: Request<ParamsDictionary, any, any, QueryString.ParsedQs, Record<string, any>>, response: Response<any, Record<string, any>>): Promise<Response<any, Record<string, any>> | undefined>
+    +{static} createEvent(request: Request<ParamsDictionary, any, any, QueryString.ParsedQs, Record<string, any>>, response: Response<any, Record<string, any>>): Promise<Response<any, Record<string, any>> | undefined>
+    +{static} editEvent(request: Request<ParamsDictionary, any, any, QueryString.ParsedQs, Record<string, any>>, response: Response<any, Record<string, any>>): Promise<Response<any, Record<string, any>> | undefined>
+    +{static} deleteEvent(request: Request<ParamsDictionary, any, any, QueryString.ParsedQs, Record<string, any>>, response: Response<any, Record<string, any>>): Promise<Response<any, Record<string, any>>>
+}
+class CalendarVotingModel extends Model {
+    +voting_id: number
+    +calendar_id: string
+    +owner_id: string
+    +title: string
+    +abstention_allowed: Boolean
+    +multiple_choice: Boolean
+    +creation_date: Date
+    +choices: VotingChoiceModel[]
+}
+class VotingChoiceModel extends Model {
+    +choice_id: number
+    +voting_id: number
+    +date: Date | null
+    +comment: string | null
+    +votingObject: CalendarVotingModel
+    +votes: VotingUserLinkModel[]
+}
+class VotingUserLinkModel extends Model {
+    +choice_id: number
+    +user_id: string
+    +choiceObject: VotingChoiceModel
+}
+class VotingController {
+    +{static} getCalendarVotings(request: Request<ParamsDictionary, any, any, QueryString.ParsedQs, Record<string, any>>, response: Response<any, Record<string, any>>): Promise<Response<any, Record<string, any>>>
+    +{static} getSingleCalendarVoting(request: Request<ParamsDictionary, any, any, QueryString.ParsedQs, Record<string, any>>, response: Response<any, Record<string, any>>): Promise<Response<any, Record<string, any>>>
+    +{static} createVoting(request: Request<ParamsDictionary, any, any, QueryString.ParsedQs, Record<string, any>>, response: Response<any, Record<string, any>>): Promise<Response<any, Record<string, any>>>
+    +{static} deleteVoting(request: Request<ParamsDictionary, any, any, QueryString.ParsedQs, Record<string, any>>, response: Response<any, Record<string, any>>): Promise<Response<any, Record<string, any>>>
+    +{static} vote(request: Request<ParamsDictionary, any, any, QueryString.ParsedQs, Record<string, any>>, response: Response<any, Record<string, any>>): Promise<Response<any, Record<string, any>>>
+}
+class NoteController {
+    +{static} getNoteInfo(request: Request<ParamsDictionary, any, any, QueryString.ParsedQs, Record<string, any>>, response: Response<any, Record<string, any>>): Promise<Response<any, Record<string, any>> | undefined>
+    +{static} getAllNotesInfo(request: Request<ParamsDictionary, any, any, QueryString.ParsedQs, Record<string, any>>, response: Response<any, Record<string, any>>): Promise<Response<any, Record<string, any>> | undefined>
+    +{static} createNote(request: Request<ParamsDictionary, any, any, QueryString.ParsedQs, Record<string, any>>, response: Response<any, Record<string, any>>): Promise<Response<any, Record<string, any>> | undefined>
+    +{static} editNote(request: Request<ParamsDictionary, any, any, QueryString.ParsedQs, Record<string, any>>, response: Response<any, Record<string, any>>): Promise<Response<any, Record<string, any>> | undefined>
+    +{static} deleteNote(request: Request<ParamsDictionary, any, any, QueryString.ParsedQs, Record<string, any>>, response: Response<any, Record<string, any>>): Promise<Response<any, Record<string, any>>>
+}
+class MailController {
+    -{static} transport: Mail
+    -{static} welcome_template: string
+    -{static} password_recovery_template: string
+    -{static} user_information_template: string
+    -{static} delete_account_request_template: string
+    +{static} init(): void
+    +{static} sendVerificationMail(payload: JWTEmailVerificationInterface, verify_key: string): Promise<Error | null>
+    +{static} sendPasswordRecoveryMail(user: UserModel, recovery_key: string): Promise<Error | null>
+    +{static} sendUserInformationMail(user: UserModel, dataInformation: string): Promise<Error | null>
+    +{static} sendDeleteAccountMail(user: UserModel, delete_key: string): Promise<Error | null>
+}
+class AuthController {
+    +{static} login(request: Request<ParamsDictionary, any, any, QueryString.ParsedQs, Record<string, any>>, response: Response<any, Record<string, any>>): Promise<Response<any, Record<string, any>> | undefined>
+    +{static} changePassword(request: Request<ParamsDictionary, any, any, QueryString.ParsedQs, Record<string, any>>, response: Response<any, Record<string, any>>): Promise<Response<any, Record<string, any>> | undefined>
+    +{static} generateVerificationEmail(request: Request<ParamsDictionary, any, any, QueryString.ParsedQs, Record<string, any>>, response: Response<any, Record<string, any>>): Promise<Response<any, Record<string, any>>>
+    +{static} verifyEmail(request: Request<ParamsDictionary, any, any, QueryString.ParsedQs, Record<string, any>>, response: Response<any, Record<string, any>>): Promise<Response<any, Record<string, any>> | undefined>
+    +{static} generatePasswordRecoveryKey(request: Request<ParamsDictionary, any, any, QueryString.ParsedQs, Record<string, any>>, response: Response<any, Record<string, any>>): Promise<Response<any, Record<string, any>>>
+    +{static} resetPassword(request: Request<ParamsDictionary, any, any, QueryString.ParsedQs, Record<string, any>>, response: Response<any, Record<string, any>>): Promise<Response<any, Record<string, any>> | undefined>
+    +{static} refreshAuthenticationToken(request: Request<ParamsDictionary, any, any, QueryString.ParsedQs, Record<string, any>>, response: Response<any, Record<string, any>>): Promise<Response<any, Record<string, any>>>
+    +{static} getSecurityToken(request: Request<ParamsDictionary, any, any, QueryString.ParsedQs, Record<string, any>>, response: Response<any, Record<string, any>>): Promise<Response<any, Record<string, any>>>
+    +{static} getUserIDFromToken(request: Request<ParamsDictionary, any, any, QueryString.ParsedQs, Record<string, any>>, response: Response<any, Record<string, any>>): Promise<Response<any, Record<string, any>>>
+}
+class UserController {
+    +{static} getUserInfo(request: Request<ParamsDictionary, any, any, QueryString.ParsedQs, Record<string, any>>, response: Response<any, Record<string, any>>): Promise<Response<any, Record<string, any>> | undefined>
+    +{static} patchUser(request: Request<ParamsDictionary, any, any, QueryString.ParsedQs, Record<string, any>>, response: Response<any, Record<string, any>>): Promise<Response<any, Record<string, any>> | undefined>
+    +{static} deleteUserByAdmin(request: Request<ParamsDictionary, any, any, QueryString.ParsedQs, Record<string, any>>, response: Response<any, Record<string, any>>): Promise<Response<any, Record<string, any>>>
+    +{static} requestAccountDeletion(request: Request<ParamsDictionary, any, any, QueryString.ParsedQs, Record<string, any>>, response: Response<any, Record<string, any>>): Promise<Response<any, Record<string, any>>>
+    +{static} accountDeletion(request: Request<ParamsDictionary, any, any, QueryString.ParsedQs, Record<string, any>>, response: Response<any, Record<string, any>>): Promise<Response<any, Record<string, any>> | undefined>
+    +{static} getAssociatedCalendars(request: Request<ParamsDictionary, any, any, QueryString.ParsedQs, Record<string, any>>, response: Response<any, Record<string, any>>): Promise<Response<any, Record<string, any>>>
+    +{static} changeProfilePicture(request: Request<ParamsDictionary, any, any, QueryString.ParsedQs, Record<string, any>>, response: Response<any, Record<string, any>>): Promise<Response<any, Record<string, any>> | undefined>
+    +{static} getProfilePicture(request: Request<ParamsDictionary, any, any, QueryString.ParsedQs, Record<string, any>>, response: Response<any, Record<string, any>>): Promise<Response<any, Record<string, any>> | undefined>
+    +{static} generateUserInformationEmail(request: Request<ParamsDictionary, any, any, QueryString.ParsedQs, Record<string, any>>, response: Response<any, Record<string, any>>): Promise<Response<any, Record<string, any>>>
+}
+class FilterController {
+    +{static} getEventsPeriod(request: Request<ParamsDictionary, any, any, QueryString.ParsedQs, Record<string, any>>, response: Response<any, Record<string, any>>): Promise<Response<any, Record<string, any>> | undefined>
+}
+interface RoleInterface {
+    +Role: String
+    +Amount: Number
+}
+interface UserStatisticInterface {
+    +Registered: Number
+    +Roles: RoleInterface[]
+}
+class StatisticController {
+    +{static} getUserStatistics(request: Request<ParamsDictionary, any, any, QueryString.ParsedQs, Record<string, any>>, response: Response<any, Record<string, any>>): Promise<void>
+}
+class ErrorHandler {
+    +{static} checkPreError(error: Error, request: Request<ParamsDictionary, any, any, QueryString.ParsedQs, Record<string, any>>, response: Response<any, Record<string, any>>, next: NextFunction): Promise<void>
+}
+class CorsHandler {
+    +{static} cors(request: Request<ParamsDictionary, any, any, QueryString.ParsedQs, Record<string, any>>, response: Response<any, Record<string, any>>, next: NextFunction): Promise<Response<any, Record<string, any>> | undefined>
+}
+class LoggingHandler {
+    +{static} requestLogging(request: Request<ParamsDictionary, any, any, QueryString.ParsedQs, Record<string, any>>, response: Response<any, Record<string, any>>, next: NextFunction): Promise<void>
+}
+class API {
+    +api: express.Application
+    -config(): void
+}
+class Web_Console {
+    -io?: socketIO.Server | undefined
+    -webSocketPath: string
+    -httpServer: Server
+    -validationFunction: (socket: SocketIO.Socket, next: Function) => void
+    +start(): void
+    -init(): boolean
+    -handlePreflightRequest(request: any, response: any): void
+    -overwriteOutput(io: socketIO.Server): void
+    -executeCommand(socket: socketIO.Socket, command: string): false | undefined
+}
+@enduml

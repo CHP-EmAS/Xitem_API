@@ -1,4 +1,4 @@
-import Joi, { optional } from '@hapi/joi';
+import Joi from '@hapi/joi';
 import * as customError from "../config/errorCodes" 
 
 export const createCalendarSchema = Joi.object({
@@ -73,7 +73,7 @@ export const generateInvitationTokenSchema = Joi.object({
     expire: Joi.number()
         .required()
         .min(5)
-        .max(100080)
+        .max(10080)
         .error(new Error(customError.invalidNumber)),
 });
 
