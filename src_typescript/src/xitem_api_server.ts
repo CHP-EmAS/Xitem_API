@@ -36,3 +36,4 @@ database.authenticate().then(() => {
     console.log('Critical: Cannot connect to Postgresql!\n' + err + "\nDB: " + process.env.PG_USER + "@" + process.env.PG_HOST + ":" + process.env.PG_PORT +  "/" + process.env.PG_DATABASE + " >> Schema: " + process.env.PG_SCHEMA);
 })
 
+console.log("Server stopped!")
