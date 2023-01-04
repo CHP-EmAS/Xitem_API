@@ -8,9 +8,11 @@ import routes from "./routes/routes";
 import ErrorHandler from "./middlewares/errorHandler"
 import CorsHandler from "./middlewares/corsHandler"
 import LoggingHandler from "./middlewares/loggingHandler"
+import {database} from "./config/database";
+import MailController from "./controllers/mailController";
 
 class API {
-  public api: Application;
+  private api: Application;
 
   constructor() {
     this.api = express(); 
@@ -18,6 +20,20 @@ class API {
 
     //Root
     this.api.use("/", routes);
+  }
+
+  public async start(port: String) {
+    try {
+      console.log("Connecting to Postgresql on DB: " + process.env.PG_USER + "@" + process.env.PG_HOST + ":" + process.env.PG_PORT +  "/" + process.env.PG_DATABASE + " >> Schema: " + process.env.PG_SCHEMA + " ...")
+      await database.authenticate()
+      console.log('Connection has been established successfully.');
+    } catch (error) {
+      console.error('Critical: Cannot connect to Postgresql!\n' + error + "\nDB: " + process.env.PG_USER + "@" + process.env.PG_HOST + ":" + process.env.PG_PORT +  "/" + process.env.PG_DATABASE + " >> Schema: " + process.env.PG_SCHEMA)
+      throw Error("A connection to the database could not be established!");
+    }
+
+    MailController.init()
+    this.api.listen(port, () => console.log(process.env.APP_NAME + " API started on Port: " + port + "!"));
   }
 
   private config(): void {
@@ -56,4 +72,4 @@ class API {
   }
 }
 
-export default new API().api;
+export default new API();
