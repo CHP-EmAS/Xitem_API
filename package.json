@@ -20,7 +20,6 @@
   },
   "homepage": "https://github.com/CHP-EmAS/Xitem_API#readme",
   "dependencies": {
-    "@hapi/joi": "^16.1.8",
     "@types/bcryptjs": "^2.4.2",
     "@types/body-parser": "^1.19.0",
     "@types/helmet": "0.0.45",
