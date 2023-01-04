@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import * as jwt from "jsonwebtoken";
-import uuid from "uuid/v4";
+import uuid from "uuid";
 
 import toObj from "../config/responseStandart"
 import * as customError from "../config/errorCodes" 
@@ -157,7 +157,7 @@ class AuthController {
       user.hashPassword(requestParams.password);
       user.password_changed_at = new Date(Date.now())
 
-      user.user_id = uuid();
+      user.user_id = uuid.v4();
       user.active = true;
       user.role = Roles.Verified;
 

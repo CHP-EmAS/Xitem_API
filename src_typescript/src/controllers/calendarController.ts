@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import Sequelize  from "sequelize";
 import * as jwt from "jsonwebtoken";
-import uuid from "uuid/v4";
+import uuid from "uuid";
 
 import toObj from "../config/responseStandart"
 import * as customError from "../config/errorCodes"
@@ -89,7 +89,7 @@ class CalendarController {
 
         let calendar = new CalendarModel();
 
-        calendar.calendar_id = uuid();
+        calendar.calendar_id = uuid.v4();
         calendar.calendar_name = fullCalendarName;
         calendar.can_join = requestParams.can_join;
         calendar.hashPassword(requestParams.password);
