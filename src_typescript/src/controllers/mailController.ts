@@ -29,7 +29,7 @@ class MailController {
             },
         });
         
-        MailController.transport.verify(function(error, success) {
+        MailController.transport.verify(function(error) {
             if(error) {
                 console.error("Failed to initialize NodeMailer! >> HOST: " + process.env.MAIL_HOST + ":" + process.env.MAIL_PORT + ", USER: " + process.env.MAIL_USER)
                 console.error(error)
@@ -52,7 +52,7 @@ class MailController {
 
     public static async sendVerificationMail(payload: JWTEmailVerificationInterface, verify_key: string): Promise<( Error | null )> {
 
-        var emailContent: string = MailController.welcome_template.replace("{{nickname}}", payload.name)
+        let emailContent: string = MailController.welcome_template.replace("{{nickname}}", payload.name);
         emailContent = emailContent.replace("{{verify_key}}", verify_key)
         emailContent = emailContent.replace("{{email}}", payload.email)
 
@@ -74,7 +74,7 @@ class MailController {
 
     public static async sendPasswordRecoveryMail(user: UserModel, recovery_key: string): Promise<( Error | null )> {
 
-        var emailContent: string = MailController.password_recovery_template.replace("{{nickname}}", user.name)
+        let emailContent: string = MailController.password_recovery_template.replace("{{nickname}}", user.name);
         emailContent = emailContent.replace("{{recovery_key}}", recovery_key)
         emailContent = emailContent.replace("{{email}}", user.email)
 
@@ -85,7 +85,7 @@ class MailController {
             html: emailContent
         };
         
-        MailController.transport.sendMail(message, function(error: (Error|null), info) {
+        MailController.transport.sendMail(message, function(error: (Error|null)) {
             if (error) {
               return error
             }
@@ -96,7 +96,7 @@ class MailController {
 
     public static async sendUserInformationMail(user: UserModel, dataInformation: string): Promise<( Error | null )> {
 
-        var emailContent: string = MailController.user_information_template.replace("{{nickname}}", user.name)
+        const emailContent: string = MailController.user_information_template.replace("{{nickname}}", user.name);
 
         const picturePath: string = path.join(process.cwd(), "static", "images", "profile_pictures", user.user_id + ".png");
         
@@ -124,8 +124,12 @@ class MailController {
                 ];
             }
 
-        } catch( error ) {
-            return error;
+        } catch( error: unknown ) {
+            if(error instanceof Error) {
+                return error;
+            }
+
+            return Error("Unknown Error");
         }
 
         const message = {
@@ -136,18 +140,16 @@ class MailController {
             attachments: attachments,
         };
         
-        MailController.transport.sendMail(message, function(error: (Error|null), info) {
-            if (error) {
-              return error
-            }
+        MailController.transport.sendMail(message, function(error: (Error|null)) {
+            return error
         });
-        
+
         return null
     }
 
     public static async sendDeleteAccountMail(user: UserModel, delete_key: string): Promise<( Error | null )> {
 
-        var emailContent: string = MailController.delete_account_request_template.replace("{{nickname}}", user.name)
+        let emailContent: string = MailController.delete_account_request_template.replace("{{nickname}}", user.name);
         emailContent = emailContent.replace("{{delete_key}}", delete_key)
         emailContent = emailContent.replace("{{email}}", user.email)
 
@@ -158,7 +160,7 @@ class MailController {
             html: emailContent
         };
         
-        MailController.transport.sendMail(message, function(error: (Error|null), info) {
+        MailController.transport.sendMail(message, function(error: (Error|null)) {
             if (error) {
               return error
             }

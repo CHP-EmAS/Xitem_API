@@ -8,7 +8,7 @@ import CalendarController from "./calendarController";
 
 import { CalendarVotingModel, VotingChoiceModel, VotingUserLinkModel } from "../models/Votings";
 
-import { LocalPayloadInterface, CreateVotingInterface, VotingInterface, VotingChoiceInterface, AddVotingChoiceInterface, VoteInterface } from "../validation/interfaces"
+import { LocalPayloadInterface, CreateVotingInterface, VotingInterface, VotingChoiceInterface, VoteInterface } from "../validation/interfaces"
 import { createVotingSchema, voteSchema } from "../validation/votingValidationSchemas"
 
 
@@ -193,7 +193,7 @@ class VotingController {
         //get all associated users form the calendar
         const isMember = await CalendarController.isCalendarMember(requested_calendar_id, userPayload.user_id);
         if(isMember == null) return response.status(403).json(toObj(response, {Error: customError.accessForbidden}));
-        if(!isMember.is_owner) return response.status(403).json(toObj(response, {Error: customError.insufficientPermissions}));
+        if(!isMember.can_edit_events || !isMember.is_owner) return response.status(403).json(toObj(response, {Error: customError.insufficientPermissions}));
 
         let voting = new CalendarVotingModel();
 
@@ -247,7 +247,7 @@ class VotingController {
         }
 
         if(errorCreatingChoices) {
-            newVoting.destroy();
+            await newVoting.destroy();
             return response.status(500).json(toObj(response));
         }
             
@@ -283,7 +283,7 @@ class VotingController {
                  }
              }
  
-             voting.destroy();
+             await voting.destroy();
  
              return response.status(200).json(toObj(response,{Info: "Voting deleted"}));
  

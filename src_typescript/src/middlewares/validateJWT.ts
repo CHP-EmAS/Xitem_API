@@ -1,18 +1,18 @@
-import { Request, Response, NextFunction } from "express";
-import jwt from "jsonwebtoken";
+import {NextFunction, Request, Response} from "express";
+import jwt, {TokenExpiredError} from "jsonwebtoken";
 
-import * as customError from "../config/errorCodes" 
+import * as customError from "../config/errorCodes"
 import toObj from "../config/responseStandart"
 
-import { JWTPayloadInterface, LocalPayloadInterface } from "../validation/interfaces";
-import { UserModel } from "../models/User";
-import { UserRoleModel } from "../models/UserRole";
+import {JWTPayloadInterface, LocalPayloadInterface} from "../validation/interfaces";
+import {UserModel} from "../models/User";
+import {UserRoleModel} from "../models/UserRole";
 
 export const enum TokenType {
   Authentication = "auth",
   Refresh = "refresh",
   Security = "secure",
-};
+}
 
 export const authProtected = async (request: Request, response: Response, next: NextFunction) => {
   //Get the jwt token from headers
@@ -25,15 +25,16 @@ export const authProtected = async (request: Request, response: Response, next: 
 
   if(localPayload instanceof Error) {
 
+    //auth token could not be verified
     return response.status(401).json(toObj(response,{Error: localPayload.message}));
 
   } else {
 
-    //store jwt in locals
+    //store jwt informations in locals
     response.locals.userPayload = localPayload;
 
+    //rufe nächste 
     next();
-
   }
 };
 
@@ -115,18 +116,17 @@ export const validateToken = async (token: string, tokenType: TokenType) : Promi
     } 
     
     //store jwt in locals
-    const localPayload: LocalPayloadInterface = {user_id: verifiedPayload.user_id,name: user.name, role: user.roleObject}
-    return localPayload;
+    return {user_id: verifiedPayload.user_id, name: user.name, role: user.roleObject};
 
-  } catch ( error ) {
+  } catch ( error: unknown ) {
 
-    //catch error
-    if( error.name == 'TokenExpiredError' ) return new Error(customError.expiredToken);
-    else {
-      console.error("Unknown error when verifying a jwt payload!")
-      console.error(error)
-      return new Error(customError.invalidToken);
+    if(error instanceof TokenExpiredError) {
+      return new Error(customError.expiredToken);
     }
+
+    console.error("Unknown error when verifying a jwt payload!")
+    console.error(error)
+    return new Error(customError.invalidToken);
   }
 
 }

@@ -2,7 +2,6 @@ import { Router } from "express";
 import AuthController from "../controllers/authController";
 
 import { authProtected } from "../middlewares/validateJWT";
-import { Roles , roleCheck } from "../middlewares/checkRole";
 
 // ######### /auth route ######### //
 

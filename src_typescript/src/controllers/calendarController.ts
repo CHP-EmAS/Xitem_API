@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import Sequelize  from "sequelize";
 import * as jwt from "jsonwebtoken";
-import uuid from "uuid/v4";
+import uuid from "uuid";
 
 import toObj from "../config/responseStandart"
 import * as customError from "../config/errorCodes"
@@ -11,6 +11,7 @@ import { createCalendarSchema, editCalendarSchema, addAssociatedUserSchema, patc
 
 import { CalendarModel } from "../models/Calendar";
 import { CalendarUserLinkModel } from "../models/Calendar_User_lnk";
+import {TokenExpiredError} from "jsonwebtoken";
 
 class CalendarController {
 
@@ -88,7 +89,7 @@ class CalendarController {
 
         let calendar = new CalendarModel();
 
-        calendar.calendar_id = uuid();
+        calendar.calendar_id = uuid.v4();
         calendar.calendar_name = fullCalendarName;
         calendar.can_join = requestParams.can_join;
         calendar.hashPassword(requestParams.password);
@@ -179,7 +180,7 @@ class CalendarController {
             
             //save calendar
             await calendar.save()
-                .then((editCalendar: CalendarModel) => {
+                .then(() => {
                     return response.status(200).json(toObj(response,{Info: "Calendar succesfully updated"}));
                 })
         } catch( error ) {
@@ -210,19 +211,19 @@ class CalendarController {
             const calendar: CalendarModel | null = await CalendarModel.findByPk(calendar_to_delete);
             if(!calendar) return response.status(404).json(toObj(response, {Error: customError.calendarNotFound}));
 
-            calendar.destroy();
+            await calendar.destroy();
 
             return response.status(200).json(toObj(response,{Info: "Calendar deleted"}));
 
         } catch ( error ) {
             console.log(error);
-            return response.status(500).json(toObj(response, {Error: error.message}));
+            return response.status(500).json(toObj(response));
         }
     }
 
     //############# Associated User Functions #############//
 
-    //GET get all associated users (JWT) 
+    //GET all associated users (JWT)
     public static async getAllAssociatedUsers(request: Request, response: Response) {
         //get and validate JWT Payload
         const userPayload: LocalPayloadInterface = response.locals.userPayload;
@@ -246,7 +247,7 @@ class CalendarController {
         return response.status(200).json(toObj(response,{associated_users: associatedUsers}));
     }
 
-    //GET get associated user (JWT) 
+    //GET associated user (JWT)
     public static async getAssociatedUser(request: Request, response: Response) {
         //get and validate JWT Payload
         const userPayload: LocalPayloadInterface = response.locals.userPayload;
@@ -313,7 +314,7 @@ class CalendarController {
             //change data 
             if(associatedUser.is_owner != requestParams.is_owner && requestParams.is_owner != undefined){
 
-                if(requestParams.is_owner == false) {
+                if(!requestParams.is_owner) {
                     //find associated users in database
                     const memberList = await CalendarController.associatedUsers(requested_calendar_id)
                     if(!memberList) return response.status(404).json(toObj(response, {Error: customError.memberNotFound}));
@@ -435,7 +436,7 @@ class CalendarController {
             associatedUser.calendar_id = calendar.calendar_id;
             associatedUser.user_id = userPayload.user_id;
             associatedUser.is_owner = false;
-            associatedUser.can_create_events = false;
+            associatedUser.can_create_events = true;
             associatedUser.can_edit_events = false;
 
             if(requestParams.color) 
@@ -508,7 +509,7 @@ class CalendarController {
             });
             if(!link) return response.status(404).json(toObj(response, {Error: customError.memberNotFound}));
             
-            link.destroy();
+            await link.destroy();
 
             return response.status(200).json(toObj(response,{Info: "User was removed from calendar"}));
 
@@ -593,7 +594,9 @@ class CalendarController {
             const invitation_calendar = verifiedPayload.calendar_id;
 
             const calendar: (CalendarModel | null) = await CalendarModel.findByPk(invitation_calendar);
-            if(!calendar) return response.status(404).json(toObj(response, {Error: customError.calendarNotFound}));
+            if(!calendar) {
+                return response.status(404).json(toObj(response, {Error: customError.calendarNotFound}));
+            }
 
             //get all associated users form the calendar
             const isMember = await CalendarController.isCalendarMember(calendar.calendar_id, userPayload.user_id);
@@ -620,16 +623,15 @@ class CalendarController {
             console.log("User " + userPayload.name + "<" + userPayload.user_id + "> is now member of Calendar " + calendar.calendar_id + " (Invitation-Token)")
             return response.status(201).json(toObj(response,{calendar_id: calendar.calendar_id}));
 
-        } catch ( error ) {
-    
-            //catch error
-            if( error.name == 'TokenExpiredError' ) return response.status(400).json(toObj(response,{Error: customError.expiredToken}));
-            else {
-                console.warn("Unknown error when verifying a jwt invitation payload!")
-                console.error(error)
-                return response.status(400).json(toObj(response,{Error: customError.invalidToken}));
+        } catch ( error: unknown ) {
+
+            if(error instanceof TokenExpiredError) {
+                return response.status(400).json(toObj(response,{Error: customError.expiredToken}));
             }
-    
+
+            console.warn("Unknown error when verifying a jwt invitation payload!")
+            console.error(error)
+            return response.status(400).json(toObj(response,{Error: customError.invalidToken}));
         }
 
     }

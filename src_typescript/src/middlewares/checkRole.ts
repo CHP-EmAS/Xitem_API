@@ -21,7 +21,7 @@ export const enum Comparisons {
   isLessOrEqualThan = "less or equal than"
 };
 
-export class roleCheck{
+export class RoleCheck{
 
   private static chachedRoles: Map<String,UserRoleModel> = new Map<String,UserRoleModel>();
 

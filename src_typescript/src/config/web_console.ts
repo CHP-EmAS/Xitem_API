@@ -1,11 +1,11 @@
 import {Server} from "http";
-import socketIO from 'socket.io' ;
+import SocketIO from "socket.io";
 
 import * as customError from "../config/errorCodes" 
 import { validateToken, TokenType } from "../middlewares/validateJWT"
-import { JWTPayloadInterface, LocalPayloadInterface } from "../validation/interfaces";
-import { Roles , Comparisons, roleCheck } from "../middlewares/checkRole"
-import { exec } from "child_process";
+import { LocalPayloadInterface } from "../validation/interfaces";
+import { Roles, RoleCheck } from "../middlewares/checkRole"
+
 
 class Web_Console {
 
@@ -31,7 +31,7 @@ class Web_Console {
             this.io.close; 
         }
             
-        this.io = socketIO(this.httpServer, {
+        this.io = SocketIO(this.httpServer, {
             path: this.webSocketPath,
             handlePreflightRequest: this.handlePreflightRequest
         });
@@ -133,7 +133,7 @@ export const validateUserAccess = async (socket: SocketIO.Socket, next: Function
         return next(new Error(localPayload.message));
     } else {
 
-        if(roleCheck.isEqualTo([Roles.SystemAdministrator])) {
+        if(RoleCheck.isEqualTo([Roles.SystemAdministrator])) {
             console.log("[web_console] [JWT_Validation] Socket<" + socket.id + "> has established a connection with validated User " + localPayload.name + "!")
             next();
         } else {
