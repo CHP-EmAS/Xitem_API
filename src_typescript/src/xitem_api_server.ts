@@ -24,8 +24,6 @@ console.log((process.env.JWT_DELETE_ACCOUNT_SECRET  ? "✓" : "X") + " JWT_DELET
 console.log(" ");
 
 console.log("Starting Server...")
-api.start(String(PORT)).then(() =>
-    console.log("API stopped")
-).catch((error) =>
+api.start(String(PORT)).catch((error) =>
     console.log("API crashed with Error:\n" + error)
 )
