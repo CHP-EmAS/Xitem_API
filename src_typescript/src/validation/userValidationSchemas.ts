@@ -1,4 +1,4 @@
-import Joi, { required } from '@hapi/joi';
+import Joi from 'joi';
 import * as customError from "../config/errorCodes" 
 
 export const patchUserSchema = Joi.object({

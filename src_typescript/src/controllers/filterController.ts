@@ -1,17 +1,14 @@
 import { Request, Response } from "express";
-import { Sequelize, Op } from "sequelize";
+import { Op } from "sequelize";
 
 import toObj from "../config/responseStandart"
 import * as customError from "../config/errorCodes"
 
-import { FilterUserInterface, LocalPayloadInterface, GetEventPeriodInterface} from "../validation/interfaces"
+import { LocalPayloadInterface, GetEventPeriodInterface} from "../validation/interfaces"
 
-import { filterUserSchema } from "../validation/filterValidationSchemas";
 import { editEventSchema } from "../validation/eventValidationSchemas";
 
 import { EventModel } from "../models/Event";
-import { UserModel } from "../models/User";
-import { UserRoleModel } from "../models/UserRole";
 
 import CalendarController from "../controllers/calendarController"
 
@@ -48,36 +45,42 @@ class FilterController {
         
         try{
             //get event where event_id and associated_calendar are matching the request
+            // @ts-ignore
             const events: (EventModel[] | null) = await EventModel.findAll({
                 attributes: response_event_attr, 
                 where: {
-                    [Op.and]: [
-                        {associated_calendar: requested_calendar_id},
+                    associated_calendar: requested_calendar_id,
+                    [Op.or]: [
                         {
-                            [Op.or]: [
-                            {
-                                begin_date: { 
-                                    [Op.between]: [requestParams.begin_date.toUTCString(), requestParams.end_date.toUTCString()]
+                            begin_date: {
+                                [Op.and]: {
+                                    [Op.gte]: requestParams.begin_date.toUTCString(),
+                                    [Op.lte]: requestParams.end_date.toUTCString(),
                                 }
-                            }, {
-                                end_date: { 
-                                    [Op.between]: [requestParams.begin_date.toUTCString(), requestParams.end_date.toUTCString()]
+                            }
+                        }, {
+                            end_date: {
+                                [Op.and]: {
+                                    [Op.gte]: requestParams.begin_date.toUTCString(),
+                                    [Op.lte]: requestParams.end_date.toUTCString(),
                                 }
-                            }, {
-                                [Op.and]: [{
-                                        begin_date: { 
-                                            [Op.lte]: requestParams.begin_date.toUTCString()
-                                        }
-                                    }, {
-                                        end_date: { 
-                                            [Op.gte]: requestParams.end_date.toUTCString()
-                                        }
-                                }]
-                            }]
+                            }
+                        }, {
+                            [Op.and]: [
+                                {
+                                    begin_date: {
+                                        [Op.lte]: requestParams.begin_date.toUTCString()
+                                    }
+                                },{
+                                    end_date: {
+                                        [Op.gte]: requestParams.end_date.toUTCString()
+                                    }
+                                }
+                            ]
                         }
                     ]
                 }
-            });
+            })
 
             if(!events) return response.status(404).json(toObj(response, {Error: customError.eventNotFound}));
 
@@ -90,3 +93,25 @@ class FilterController {
 }
 
 export default FilterController;
+
+// associated_calendar: requested_calendar_id,
+//     [Op.or]: [{
+//     begin_date: {
+//         [Op.between]: [requestParams.begin_date.toUTCString(), requestParams.end_date.toUTCString()]
+//     }
+// }, {
+//     end_date: {
+//         [Op.between]: [requestParams.begin_date.toUTCString(), requestParams.end_date.toUTCString()]
+//     },
+// }, {
+//     [Op.and]: [{
+//         begin_date: {
+//             [Op.lte]: requestParams.begin_date.toUTCString()
+//         },
+//         end_date: {
+//             [Op.gte]: requestParams.end_date.toUTCString()
+//         }
+//     }]
+// }
+// ]
+// }

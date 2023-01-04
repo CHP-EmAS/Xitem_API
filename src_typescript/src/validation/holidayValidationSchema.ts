@@ -1,5 +1,4 @@
-import Joi from '@hapi/joi';
-import { StateCode } from '../controllers/holidayController';
+import Joi from 'joi';
 
 export const getHolidaysSchema = Joi.object({
     year:

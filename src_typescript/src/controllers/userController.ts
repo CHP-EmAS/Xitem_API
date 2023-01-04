@@ -19,6 +19,7 @@ import { EventModel } from "../models/Event";
 import { CalendarVotingModel, VotingChoiceModel, VotingUserLinkModel } from "../models/Votings";
 import { NoteModel } from "../models/Notes";
 import MailController from "./mailController";
+import { TokenExpiredError } from "jsonwebtoken";
 
 class UserController {
 
@@ -83,10 +84,7 @@ class UserController {
 
        //change data 
        if(user.birthday != requestParams.birthday && requestParams.birthday != undefined){
-
-           if(requestParams.birthday == null) user.birthday = null;
-           else user.birthday = requestParams.birthday;
-
+           user.birthday = requestParams.birthday;
            countChanges++;
        }
 
@@ -97,7 +95,7 @@ class UserController {
 
        //save user
        user.save()
-           .then((editUser: UserModel) => {
+           .then(() => {
                return response.status(200).json(toObj(response,{Info: "User succesfully updated",Changes: countChanges}));
            })
            .catch((err: Error) => {
@@ -122,7 +120,7 @@ class UserController {
             const user: UserModel | null = await UserModel.findByPk(user_to_delete);
             if(!user) return response.status(404).json(toObj(response, {Error: customError.userNotFound}));
 
-            user.destroy();
+            await user.destroy();
 
             return response.status(200).json(toObj(response));
 
@@ -217,18 +215,17 @@ class UserController {
 
         } catch ( error ) {
 
-        //catch error
-        if( error.name == 'TokenExpiredError' ) return response.status(400).json(toObj(response,{Error: customError.expiredToken}));
-        else {
+            if(error instanceof TokenExpiredError) {
+                return response.status(400).json(toObj(response,{Error: customError.expiredToken}))
+            }
+
             console.warn("Unknown error when verifying a jwt deletion payload!")
             console.error(error)
             return response.status(400).json(toObj(response,{Error: customError.invalidToken}));
         }
-
-        }
     }
 
-    //GET get all calendars which have the user as member (JWT)
+    //GET all calendars which have the user as member (JWT)
     public static async getAssociatedCalendars(request: Request, response: Response) {
         //get and validate JWT Payload
         const userPayload: LocalPayloadInterface = response.locals.userPayload;
@@ -271,14 +268,14 @@ class UserController {
                 };
 
                 responseList.push(newAssociatedUser);
-            };
+            }
 
             if(failed) return response.status(500).json(toObj(response));
             
-            return response.status(200).json(toObj(response,{associated_calendars: responseList}));
+            return response.status(200).json(toObj(response,{associated_calendars: responseList}))
         } catch ( error ) {
             console.error(error);
-            return response.status(500).json(toObj(response));;
+            return response.status(500).json(toObj(response))
         }
     }
 
@@ -324,7 +321,7 @@ class UserController {
             cb(null, true);
         };
 
-        //configur multer -> search for avatar
+        //configure multer -> search for avatar
         let upload = multer({
             storage: storage, 
             limits: { fileSize: 1024 * 1024 * 5}, //5MB
@@ -334,7 +331,9 @@ class UserController {
         //Upload the picture to destination
         upload(request,response,function (error: any) {
             
-            if(user) console.log("User " + user.name + "(" + user_to_patch + ") changes Avatar. Size: " + Number(request.file.size / 1000000) + "MB")
+            if(user && request.file) {
+                console.log("User " + user.name + "(" + user_to_patch + ") changes Avatar. Size: " + Number(request.file.size / 1000000) + "MB")
+            }
 
             if( error instanceof Error ) {
                 console.error(error.name + ": " + error.message);
@@ -437,7 +436,7 @@ class UserController {
                 informationString += "  Farbe                 : " + listObject.color.toString() + "\n";
                 informationString += "  Symbol                : " + listObject.icon.toString() + "\n";
                 informationString += "  Erstellt am           : " + listObject.calendarObject.creation_date.toString() + "\n";
-            };
+            }
             
             //########## get event data ##########
             informationString += "\n#### Erstellte Events ####\n";
@@ -462,7 +461,7 @@ class UserController {
                 informationString += "  Farbe       : " + listObject.color.toString() + "\n";
                 informationString += "  Ganztägig   : " + listObject.daylong.toString() + "\n";
                 informationString += "  Erstellt am : " + listObject.creation_date.toString() + "\n";
-            };
+            }
             
             //########## get voting data ##########
             informationString += "\n#### Erstellte Abstimmungen ####\n";
@@ -492,7 +491,7 @@ class UserController {
                     informationString += "    Datum    :" + choice.date?.toString() + "\n";
                     informationString += "    Kommentar:" + choice.comment + "\n";
                 }
-            };
+            }
             
             //########## get votes data ##########
             informationString += "\n#### Stimmen in Abstimmungen ####\n";
@@ -518,7 +517,7 @@ class UserController {
                 informationString += "  Datum     : " + listObject.choiceObject.date?.toString() + "\n";
                 informationString += "  Kommentar : " + listObject.choiceObject.comment + "\n";
 
-            };
+            }
             
             //########## get notes data ##########
             informationString += "\n#### Erstellte Notizen ####\n";
@@ -543,7 +542,7 @@ class UserController {
                 informationString += "  Erstellt am : " + listObject.creation_date.toString() + "\n";
                 informationString += "  Geändert am : " + listObject.modification_date.toString() + "\n";
 
-            };
+            }
             
             //send email with token
             const mailError = await MailController.sendUserInformationMail(user, informationString);

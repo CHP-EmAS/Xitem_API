@@ -14,6 +14,7 @@ import { validateToken, TokenType } from "../middlewares/validateJWT";
 
 import { UserModel } from "../models/User";
 import { Roles } from "../middlewares/checkRole";
+import {TokenExpiredError} from "jsonwebtoken";
 
 class AuthController {
 
@@ -81,7 +82,7 @@ class AuthController {
     user.password_changed_at = new Date(Date.now())
 
     user.save()
-      .then((editUser: UserModel) => {
+      .then(() => {
         return response.status(200).json(toObj(response,{Info: "Password changed"}));
       })
       .catch((err: Error) => {
@@ -174,16 +175,16 @@ class AuthController {
           return response.status(500).json(toObj(response))
         });
 
-    } catch ( error ) {
+    } catch ( error: unknown ) {
 
-      //catch error
-      if( error.name == 'TokenExpiredError' ) return response.status(400).json(toObj(response,{Error: customError.expiredToken}));
-      else {
-        console.warn("Unknown error when verifying a jwt email payload!")
-        console.error(error)
-        return response.status(400).json(toObj(response,{Error: customError.invalidToken}));
+      if(error instanceof TokenExpiredError) {
+          return response.status(400).json(toObj(response,{Error: customError.expiredToken}))
       }
 
+      console.warn("Unknown error when verifying a jwt email payload!")
+      console.error(error)
+
+      return response.status(400).json(toObj(response,{Error: customError.invalidToken}))
     }
   }
 
@@ -269,7 +270,7 @@ class AuthController {
       user.password_changed_at = new Date(Date.now())
 
       user.save()
-      .then((editUser: UserModel) => {
+      .then(() => {
         console.info("Password of User " + user.name + " has been reset successfully");
         return response.status(200).json(toObj(response));
       })
@@ -278,16 +279,16 @@ class AuthController {
         return response.status(500).json(toObj(response));
       });
 
-    } catch ( error ) {
+    } catch ( error: unknown ) {
 
-      //catch error
-      if( error.name == 'TokenExpiredError' ) return response.status(400).json(toObj(response,{Error: customError.expiredToken}));
-      else {
-        console.warn("Unknown error when verifying a jwt recovery payload!")
-        console.error(error)
-        return response.status(400).json(toObj(response,{Error: customError.invalidToken}));
+      if(error instanceof TokenExpiredError) {
+        return response.status(400).json(toObj(response,{Error: customError.expiredToken}));
       }
 
+      console.warn("Unknown error when verifying a jwt recovery payload!")
+      console.error(error)
+
+      return response.status(400).json(toObj(response,{Error: customError.invalidToken}));
     }
   }
 

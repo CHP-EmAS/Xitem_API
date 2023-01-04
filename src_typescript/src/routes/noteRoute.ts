@@ -11,7 +11,7 @@ const router = Router({ mergeParams: true });
 router.post("/", NoteController.createNote); //create note
 
 router.get("/", NoteController.getAllNotesInfo); //get all notes
-router.get("/:note_id", NoteController.getNoteInfo); //get note informations
+router.get("/:note_id", NoteController.getNoteInfo); //get note information
 
 router.patch("/:note_id", NoteController.editNote); //edit note
 

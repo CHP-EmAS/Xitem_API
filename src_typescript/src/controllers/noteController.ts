@@ -198,7 +198,7 @@ class NoteController {
 
             //save calendar
             note.save()
-                .then((editNote: NoteModel) => {
+                .then(() => {
                     return response.status(200).json(toObj(response,{Info: "Note succesfully updated",Changes: countChanges}));
                 })
         } catch ( error ) {
@@ -242,7 +242,7 @@ class NoteController {
                 }
             }
 
-            note.destroy();
+            await note.destroy();
 
             return response.status(200).json(toObj(response,{Info: "Note deleted"}));
 

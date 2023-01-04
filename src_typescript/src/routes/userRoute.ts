@@ -3,7 +3,7 @@ import { Router} from "express";
 import UserController from "../controllers/userController";
 
 import { authProtected, highSecurity } from "../middlewares/validateJWT";
-import { Roles, roleCheck } from "../middlewares/checkRole";
+import { Roles, RoleCheck } from "../middlewares/checkRole";
 import { validatePathParameter } from "../middlewares/validatePathParameter";
 
 // ######### /user/{user_id} route ######### //
@@ -13,7 +13,7 @@ const router = Router({ mergeParams: true });
 //user instance routes
 router.get("/", [authProtected, validatePathParameter], UserController.getUserInfo);
 router.patch("/", [authProtected, validatePathParameter], UserController.patchUser);
-router.delete("/", [authProtected, validatePathParameter, roleCheck.isEqualTo([Roles.SystemAdministrator])], UserController.deleteUserByAdmin);
+router.delete("/", [authProtected, validatePathParameter, RoleCheck.isEqualTo([Roles.SystemAdministrator])], UserController.deleteUserByAdmin);
 
 //send account deletion mail
 router.post("/deletion_request", [authProtected, highSecurity, validatePathParameter], UserController.requestAccountDeletion)

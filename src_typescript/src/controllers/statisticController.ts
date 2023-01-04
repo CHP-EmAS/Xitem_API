@@ -7,12 +7,12 @@ import {UserRoleModel} from "../models/UserRole"
 interface RoleInterface {
     Role: String,
     Amount: Number
-};
+}
 
 interface UserStatisticInterface{
     Registered: Number,
     Roles: Array<RoleInterface>
-};
+}
 
 class StatisticController {
 

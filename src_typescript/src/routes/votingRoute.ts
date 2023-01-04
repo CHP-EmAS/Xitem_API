@@ -2,9 +2,6 @@ import { Router} from "express";
 
 import VotingController from "../controllers/votingController";
 
-import { validatePathParameter }  from "../middlewares/validatePathParameter";
-import { Roles , Comparisons, roleCheck } from "../middlewares/checkRole";
-
 // ######### /calendar/{calendar_id}/event route ######### //
 // >> user jwt checked
 

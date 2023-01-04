@@ -1,9 +1,9 @@
-import { Router, Request, Response, NextFunction} from "express";
+import { Router, Request, Response } from "express";
 
 import toObj from "../config/responseStandart";
 
 import { authProtected } from "../middlewares/validateJWT";
-import { Roles , Comparisons, roleCheck } from "../middlewares/checkRole";
+import { Roles , Comparisons, RoleCheck } from "../middlewares/checkRole";
 
 import calendar from "./calendarRoute";
 import auth from "./authRoute";
@@ -23,10 +23,10 @@ routes.use("/user/:user_id", user);
 routes.delete("/user", UserController.accountDeletion)
 
 routes.use("/calendar", [authProtected], calendar);
-routes.post("/invitation", [authProtected, roleCheck.compare(Comparisons.isGreaterOrEqualThan, Roles.Verified)], CalendarController.verifyInvitationToken);
+routes.post("/invitation", [authProtected, RoleCheck.compare(Comparisons.isGreaterOrEqualThan, Roles.Verified)], CalendarController.verifyInvitationToken);
 
 routes.use("/filter", filter);
-routes.use("/statistic", [authProtected, roleCheck.isEqualTo([Roles.SystemAdministrator, Roles.Administrator])], statistic);
+routes.use("/statistic", [authProtected, RoleCheck.isEqualTo([Roles.SystemAdministrator, Roles.Administrator])], statistic);
 routes.get("/holidays/:year/:state_code", HolidayController.getHolidays);
 
 routes.get("/", function(request: Request, response: Response) {
