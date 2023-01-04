@@ -26,15 +26,13 @@ console.log((process.env.JWT_DELETE_ACCOUNT_SECRET  ? "✓" : "X") + " JWT_DELET
 console.log(" ");
 console.log("\nConnecting to Postgresql on DB: " + process.env.PG_USER + "@" + process.env.PG_HOST + ":" + process.env.PG_PORT +  "/" + process.env.PG_DATABASE + " >> Schema: " + process.env.PG_SCHEMA + " ...");
 
-database.authenticate().then(async () => {
+database.authenticate().then(() => {
     MailController.init()
 
-    await api.listen(PORT, () => console.log(process.env.APP_NAME + " API started on Port: " + PORT + "!"));
+    console.log("Starting Server...")
+    api.listen(PORT, () => console.log(process.env.APP_NAME + " API started on Port: " + PORT + "!"));
 
-    //const webConsole = new WebConsole(httpServer, "/logging", validateUserAccess)
-    // webConsole.start();
-})
-.catch((err: string) => {
+}).catch((err: string) => {
     console.log('Critical: Cannot connect to Postgresql!\n' + err + "\nDB: " + process.env.PG_USER + "@" + process.env.PG_HOST + ":" + process.env.PG_PORT +  "/" + process.env.PG_DATABASE + " >> Schema: " + process.env.PG_SCHEMA);
 })
 
