@@ -176,6 +176,12 @@ class CalendarController {
             }
 
             if(requestParams.raw_color_legend != undefined) {
+                try {
+                    JSON.parse(requestParams.raw_color_legend);
+                } catch (e) {
+                    return response.status(400).json(toObj(response, {Error: customError.invalidJson}));
+                }
+
                 calendar.raw_color_legend = requestParams.raw_color_legend;
             }
 
