@@ -6,10 +6,11 @@ import { database, databaseSchema } from "../config/database";
 //------- Class for User Model-------//
 export class CalendarModel extends Model {
     public calendar_id!: string;
-    public calendar_name!: string; 
-    private hash_passwd!: string;
+    public calendar_name!: string;
     public can_join!: boolean;
+    public raw_color_legend!: string;
     public readonly creation_date!: Date;
+    private hash_passwd!: string;
 
     hashPassword(password: string): void {
         const salt: string = bcrypt.genSaltSync(10);
@@ -41,7 +42,12 @@ CalendarModel.init(
         type: DataTypes.BOOLEAN,
         allowNull: false,
         defaultValue: false
-    }
+    },
+    raw_color_legend: {
+        type: DataTypes.TEXT,
+        allowNull: false,
+        defaultValue: "{}"
+    },
 },
 {
     timestamps: true, 
