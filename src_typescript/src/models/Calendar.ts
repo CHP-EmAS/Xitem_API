@@ -44,7 +44,7 @@ CalendarModel.init(
         defaultValue: false
     },
     raw_color_legend: {
-        type: DataTypes.TEXT,
+        type: DataTypes.JSON,
         allowNull: false,
         defaultValue: "{}"
     },

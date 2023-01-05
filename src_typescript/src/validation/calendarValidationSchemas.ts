@@ -27,6 +27,7 @@ export const editCalendarSchema = Joi.object({
             .regex(/^[^#]*$/i) //disallow #
             .error(new Error(customError.invalidTitle)), 
         can_join: Joi.boolean(),
+        raw_color_legend: Joi.string(),
         password: Joi.string()
             .optional()
             .min(6)
