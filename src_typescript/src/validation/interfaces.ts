@@ -101,6 +101,7 @@ export interface CreateCalendarInterface {
 export interface EditCalendarInterface {
     title?: string;
     can_join?: boolean;
+    raw_color_legend?: string;
     password?: string;
 }
 

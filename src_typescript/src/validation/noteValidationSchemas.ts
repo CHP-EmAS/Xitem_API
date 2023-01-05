@@ -11,8 +11,8 @@ export const createNoteSchema = Joi.object({
             .error(new Error(customError.missingArgument)),
     color: Joi.number()
             .required()
-            .min(4278190080)
-            .max(4294967295)
+            .min(0)
+            .max(50)
             .error(new Error(customError.invalidColor)),
     pinned: Joi.boolean()
             .required()
@@ -25,8 +25,8 @@ export const editNoteSchema = Joi.object({
         .error(new Error(customError.invalidTitle)),
     content: Joi.string(),
     color: Joi.number()
-            .min(4278190080)
-            .max(4294967295)
+            .min(0)
+            .max(50)
             .error(new Error(customError.invalidColor)),
     pinned: Joi.boolean()
 });

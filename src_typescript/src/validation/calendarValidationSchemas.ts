@@ -15,8 +15,8 @@ export const createCalendarSchema = Joi.object({
             .error(new Error(customError.missingArgument)),
         color: Joi.number()
             .optional()
-            .min(4278190080)
-            .max(4294967295)
+            .min(0)
+            .max(50)
             .error(new Error(customError.invalidColor)),
         icon: Joi.number()
             .optional()
@@ -42,8 +42,8 @@ export const patchAssociatedUserSchema = Joi.object({
 export const patchCalendarLayoutSchema = Joi.object({
         color: Joi.number()
             .required()
-            .min(4278190080)
-            .max(4294967295)
+            .min(0)
+            .max(50)
             .error(new Error(customError.invalidColor)),
         icon: Joi.number()
             .required()
@@ -56,8 +56,8 @@ export const addAssociatedUserSchema = Joi.object({
             .error(new Error(customError.missingArgument)),
         color: Joi.number()
             .optional()
-            .min(4278190080)
-            .max(4294967295)
+            .min(0)
+            .max(50)
             .error(new Error(customError.invalidColor)),
         icon: Joi.number()
             .optional()
@@ -83,8 +83,8 @@ export const verifyInvitationSchema = Joi.object({
         .error(new Error(customError.missingArgument)),
     color: Joi.number()
         .optional()
-        .min(4278190080)
-        .max(4294967295)
+        .min(0)
+        .max(50)
         .error(new Error(customError.invalidColor)),
     icon: Joi.number()
         .optional()

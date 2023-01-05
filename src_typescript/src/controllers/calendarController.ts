@@ -35,7 +35,7 @@ class CalendarController {
         if(isMember == null) return response.status(403).json(toObj(response, {Error: customError.accessForbidden}));
 
         //find calendar in database
-        const response_calendar_attr = ['calendar_id', 'calendar_name', 'can_join', 'creation_date'];
+        const response_calendar_attr = ['calendar_id', 'calendar_name', 'can_join', 'raw_color_legend', 'creation_date'];
 
         try{
             const calendar: CalendarUserLinkModel | null = await CalendarUserLinkModel.findOne({ 
@@ -92,6 +92,7 @@ class CalendarController {
         calendar.calendar_id = uuid.v4();
         calendar.calendar_name = fullCalendarName;
         calendar.can_join = requestParams.can_join;
+        calendar.raw_color_legend = "{}"
         calendar.hashPassword(requestParams.password);
     
         try {
@@ -172,6 +173,10 @@ class CalendarController {
 
             if(requestParams.can_join != undefined) {
                 calendar.can_join = requestParams.can_join;
+            }
+
+            if(requestParams.raw_color_legend != undefined) {
+                calendar.raw_color_legend = requestParams.raw_color_legend;
             }
 
             if(requestParams.password != undefined) {
