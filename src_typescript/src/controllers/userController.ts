@@ -247,7 +247,7 @@ class UserController {
                 include: [{
                     model: CalendarModel, 
                     as: 'calendarObject',
-                    attributes: ['calendar_id', 'calendar_name', 'can_join', 'creation_date']
+                    attributes: ['calendar_id', 'calendar_name', 'can_join', 'raw_color_legend', 'creation_date']
                 }]
             });
 
