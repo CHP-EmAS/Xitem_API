@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 
 import toObj from "../config/responseStandart"
-import * as customError from "../config/errorCodes"
 
 import { isValidUUID, isValidIntegerID } from "../validation/standartSchemas";
 

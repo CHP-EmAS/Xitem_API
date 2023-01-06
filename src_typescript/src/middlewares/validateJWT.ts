@@ -1,5 +1,5 @@
 import {NextFunction, Request, Response} from "express";
-import jwt, {TokenExpiredError} from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 
 import * as customError from "../config/errorCodes"
 import toObj from "../config/responseStandart"
@@ -120,7 +120,7 @@ export const validateToken = async (token: string, tokenType: TokenType) : Promi
 
   } catch ( error: unknown ) {
 
-    if(error instanceof TokenExpiredError) {
+    if(error instanceof jwt.TokenExpiredError) {
       return new Error(customError.expiredToken);
     }
 

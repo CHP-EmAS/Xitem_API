@@ -4,7 +4,7 @@ import toObj from "../config/responseStandart"
 
 import { UserModel } from "../models/User";
 import { UserRoleModel } from "../models/UserRole"
-import { JWTPayloadInterface, LocalPayloadInterface } from "../validation/interfaces";
+import { LocalPayloadInterface } from "../validation/interfaces";
 
 export const enum Roles {
   SystemAdministrator = "sysadmin",
@@ -12,14 +12,14 @@ export const enum Roles {
   Verified = "verified",
   Unverified = "unverified",
   Readonly = "readonly",
-};
+}
 
 export const enum Comparisons {
   isGreaterThan = "greater than",
   isLessThan = "less than",
   isGreaterOrEqualThan = "greater or equal than",
   isLessOrEqualThan = "less or equal than"
-};
+}
 
 export class RoleCheck{
 

@@ -5,9 +5,7 @@ import toObj from "../config/responseStandart"
 import * as customError from "../config/errorCodes"
 
 import { LocalPayloadInterface, GetEventPeriodInterface} from "../validation/interfaces"
-
 import { editEventSchema } from "../validation/eventValidationSchemas";
-
 import { EventModel } from "../models/Event";
 
 import CalendarController from "../controllers/calendarController"
@@ -45,7 +43,6 @@ class FilterController {
         
         try{
             //get event where event_id and associated_calendar are matching the request
-            // @ts-ignore
             const events: (EventModel[] | null) = await EventModel.findAll({
                 attributes: response_event_attr, 
                 where: {
@@ -93,25 +90,3 @@ class FilterController {
 }
 
 export default FilterController;
-
-// associated_calendar: requested_calendar_id,
-//     [Op.or]: [{
-//     begin_date: {
-//         [Op.between]: [requestParams.begin_date.toUTCString(), requestParams.end_date.toUTCString()]
-//     }
-// }, {
-//     end_date: {
-//         [Op.between]: [requestParams.begin_date.toUTCString(), requestParams.end_date.toUTCString()]
-//     },
-// }, {
-//     [Op.and]: [{
-//         begin_date: {
-//             [Op.lte]: requestParams.begin_date.toUTCString()
-//         },
-//         end_date: {
-//             [Op.gte]: requestParams.end_date.toUTCString()
-//         }
-//     }]
-// }
-// ]
-// }

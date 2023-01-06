@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import Sequelize  from "sequelize";
-import * as jwt from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import uuid from "uuid";
 
 import toObj from "../config/responseStandart"
@@ -11,7 +11,6 @@ import { createCalendarSchema, editCalendarSchema, addAssociatedUserSchema, patc
 
 import { CalendarModel } from "../models/Calendar";
 import { CalendarUserLinkModel } from "../models/Calendar_User_lnk";
-import {TokenExpiredError} from "jsonwebtoken";
 
 class CalendarController {
 
@@ -636,7 +635,7 @@ class CalendarController {
 
         } catch ( error: unknown ) {
 
-            if(error instanceof TokenExpiredError) {
+            if(error instanceof jwt.TokenExpiredError) {
                 return response.status(400).json(toObj(response,{Error: customError.expiredToken}));
             }
 

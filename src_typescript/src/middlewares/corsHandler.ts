@@ -2,7 +2,6 @@ import { Request, Response, NextFunction } from "express";
 
 import toObj from "../config/responseStandart"
 
-
 class CorsHandler {
     public static async cors(request: Request, response: Response, next: NextFunction) {
       //set headers

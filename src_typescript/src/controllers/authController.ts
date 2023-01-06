@@ -14,7 +14,6 @@ import { validateToken, TokenType } from "../middlewares/validateJWT";
 
 import { UserModel } from "../models/User";
 import { Roles } from "../middlewares/checkRole";
-import {TokenExpiredError} from "jsonwebtoken";
 
 class AuthController {
 
@@ -177,7 +176,7 @@ class AuthController {
 
     } catch ( error: unknown ) {
 
-      if(error instanceof TokenExpiredError) {
+      if(error instanceof jwt.TokenExpiredError) {
           return response.status(400).json(toObj(response,{Error: customError.expiredToken}))
       }
 
@@ -281,7 +280,7 @@ class AuthController {
 
     } catch ( error: unknown ) {
 
-      if(error instanceof TokenExpiredError) {
+      if(error instanceof jwt.TokenExpiredError) {
         return response.status(400).json(toObj(response,{Error: customError.expiredToken}));
       }
 
@@ -294,7 +293,6 @@ class AuthController {
 
   //Token
   public static async refreshAuthenticationToken(request: Request, response: Response) {
-  
     //Get the jwt tokens from headers
     const auth_token: string = <string>request.headers["auth-token"];
     const refresh_token: string = <string>request.headers["refresh-token"];
@@ -335,7 +333,6 @@ class AuthController {
     return response.status(401).json(toObj(response,{Error: customError.invalidToken}));
   }
   public static async getSecurityToken(request: Request, response: Response) {
-  
     //Get the jwt tokens from headers
     const auth_token: string = <string>request.headers["auth-token"];
     const refresh_token: string = <string>request.headers["refresh-token"];

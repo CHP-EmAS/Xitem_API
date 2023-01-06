@@ -1,18 +1,15 @@
 import { Request, Response } from "express";
-import moment from "moment"
 import Sequelize  from "sequelize";
 
 import toObj from "../config/responseStandart"
 import * as customError from "../config/errorCodes"
 
-import { LocalPayloadInterface, CreateEventInterface, EditEventInterface, GetEventPeriodInterface } from "../validation/interfaces"
+import { LocalPayloadInterface, CreateEventInterface, EditEventInterface } from "../validation/interfaces"
 import { createEventSchema, editEventSchema } from "../validation/eventValidationSchemas";
 
 import { EventModel } from "../models/Event";
 
 import CalendarController from "./calendarController"
-import { UserModel } from "../models/User";
-import { UserRoleModel } from "../models/UserRole";
 import { NoteModel } from "../models/Notes";
 
 class EventController {
@@ -179,16 +176,16 @@ class EventController {
                 countChanges++;
             }
 
-            if(requestParams.description == null || requestParams.description == "") {
-                event.description = "";
-            }
-
-            if(event.description != requestParams.description && requestParams.description){
-                event.description = requestParams.description
+            if(event.description != requestParams.description){
+                if(requestParams.description == null) {
+                    event.description = "";
+                } else {
+                    event.description = requestParams.description
+                }
                 countChanges++;
             }
 
-            if(event.daylong != requestParams.daylong && requestParams.daylong){
+            if(event.daylong != requestParams.daylong && requestParams.daylong != undefined){
                 event.daylong = requestParams.daylong
                 countChanges++;
             }
@@ -220,8 +217,8 @@ class EventController {
 
             //save calendar
             event.save()
-                .then((editEvent: EventModel) => {
-                    return response.status(200).json(toObj(response,{Info: "Event succesfully updated",Changes: countChanges}));
+                .then(() => {
+                    return response.status(200).json(toObj(response,{Info: "Event successfully updated",Changes: countChanges}));
                 })
         } catch ( error ) {
             console.error(error);
@@ -264,7 +261,7 @@ class EventController {
                 }
             }
 
-            event.destroy();
+            await event.destroy();
 
             return response.status(200).json(toObj(response,{Info: "Event deleted"}));
 

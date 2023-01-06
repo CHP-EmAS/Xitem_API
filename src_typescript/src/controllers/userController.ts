@@ -3,7 +3,7 @@ import { Request, Response } from "express";
 import multer from 'multer';
 import path from 'path';
 import * as filesystem from 'fs';
-import * as jwt from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 
 import toObj from "../config/responseStandart"
 import * as customError from "../config/errorCodes"
@@ -19,7 +19,6 @@ import { EventModel } from "../models/Event";
 import { CalendarVotingModel, VotingChoiceModel, VotingUserLinkModel } from "../models/Votings";
 import { NoteModel } from "../models/Notes";
 import MailController from "./mailController";
-import { TokenExpiredError } from "jsonwebtoken";
 
 class UserController {
 
@@ -132,7 +131,6 @@ class UserController {
 
     //Account Deletion
     public static async requestAccountDeletion(request: Request, response: Response) {
-        
         //get and validate JWT Payload
         const userPayload: LocalPayloadInterface = response.locals.userPayload;
 
@@ -215,7 +213,7 @@ class UserController {
 
         } catch ( error ) {
 
-            if(error instanceof TokenExpiredError) {
+            if(error instanceof jwt.TokenExpiredError) {
                 return response.status(400).json(toObj(response,{Error: customError.expiredToken}))
             }
 
