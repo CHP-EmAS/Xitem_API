@@ -16,7 +16,6 @@ import { UserRoleModel } from "../models/UserRole"
 import { CalendarUserLinkModel } from "../models/Calendar_User_lnk"
 import { CalendarModel } from "../models/Calendar";
 import { EventModel } from "../models/Event";
-import { CalendarVotingModel, VotingChoiceModel, VotingUserLinkModel } from "../models/Votings";
 import { NoteModel } from "../models/Notes";
 import MailController from "./mailController";
 
@@ -460,63 +459,7 @@ class UserController {
                 informationString += "  Ganztägig   : " + listObject.daylong.toString() + "\n";
                 informationString += "  Erstellt am : " + listObject.creation_date.toString() + "\n";
             }
-            
-            //########## get voting data ##########
-            informationString += "\n#### Erstellte Abstimmungen ####\n";
 
-            const votings: CalendarVotingModel[] = await CalendarVotingModel.findAll({
-                where: {
-                    owner_id: userID,  
-                },
-                include: [{
-                    model: VotingChoiceModel, 
-                    as: 'choices', 
-                }]
-            });
-
-            for ( const listObject of votings ) {
-                
-                informationString += "\n- " + listObject.voting_id.toString() + "\n";
-                informationString += "  Kalender          : " + listObject.calendar_id + "\n";
-                informationString += "  Title             : " + listObject.title + "\n";
-                informationString += "  Enthaltung möglich: " + listObject.abstention_allowed.toString() + "\n";
-                informationString += "  Mehrfachauswahl   : " + listObject.multiple_choice.toString() + "\n";
-                informationString += "  Erstellt am       : " + listObject.creation_date.toString() + "\n";
-                informationString += "  Wahlmöglichkeiten : " + "\n";
-
-                for ( const choice of listObject.choices ) {
-                    informationString += "  - " + choice.choice_id.toString() + "\n";
-                    informationString += "    Datum    :" + choice.date?.toString() + "\n";
-                    informationString += "    Kommentar:" + choice.comment + "\n";
-                }
-            }
-            
-            //########## get votes data ##########
-            informationString += "\n#### Stimmen in Abstimmungen ####\n";
-
-            const votes: VotingUserLinkModel[] = await VotingUserLinkModel.findAll({
-                where: {
-                    user_id: userID,  
-                },
-                include: [{
-                    model: VotingChoiceModel, 
-                    as: 'choiceObject',
-                    include: [{
-                        model: CalendarVotingModel, 
-                        as: 'votingObject',
-                    }]
-                }]
-            });
-
-            for ( const listObject of votes ) {
-                
-                informationString += "\n-Abgestimmt für " + listObject.choiceObject.votingObject.title + " (" + listObject.choiceObject.votingObject.voting_id.toString() + ")" + "\n";
-                informationString += "  Auswahl ID: " + listObject.choiceObject.choice_id.toString() + "\n";
-                informationString += "  Datum     : " + listObject.choiceObject.date?.toString() + "\n";
-                informationString += "  Kommentar : " + listObject.choiceObject.comment + "\n";
-
-            }
-            
             //########## get notes data ##########
             informationString += "\n#### Erstellte Notizen ####\n";
 

@@ -4,9 +4,10 @@ dotenv.config();
 import api from "./api";
 
 const PORT = process.env.PORT || 3000;
-const VERSION = "0.8.10";
+export const API_VERSION = "1.0.0";
+export const MIN_APP_VERSION = "1.3.0"
 
-console.log("########################## " + process.env.APP_NAME + " API Version: " + VERSION + " ##########################");
+console.log("########################## " + process.env.APP_NAME + " API Version: " + API_VERSION + " ##########################");
 console.log(" ");
 console.log("Starting " + process.env.APP_NAME + " API on Port: " + PORT + " ...");
 console.log(" ");

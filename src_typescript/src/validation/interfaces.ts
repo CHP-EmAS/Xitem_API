@@ -182,43 +182,6 @@ export interface EditEventInterface {
     pinned_note?: number;
 }
 
-//------- Voting Interfaces -------//
-export interface VotingInterface {
-    voting_id: number,
-    owner_id: string,
-    title: string;
-    abstention_allowed: Boolean;
-    multiple_choice: Boolean;
-    userHasVoted: Boolean;
-    userVotedFor: Array<number>;
-    numberUsersWhoHaveVoted: number;
-    choices: Array<VotingChoiceInterface>
-    creation_date: Date;
-}
-
-export interface VotingChoiceInterface {
-    choice_id: number,
-    date: ( Date | null ),
-    comment: ( string | null ),
-    amountVotes: number,
-}
-
-export interface CreateVotingInterface {
-    title: string;
-    multiple_choice: Boolean;
-    abstention_allowed: Boolean;
-    choices: Array<AddVotingChoiceInterface>
-}
-
-export interface AddVotingChoiceInterface {
-    date: Date;
-    comment: string;
-}
-
-export interface VoteInterface {
-    choice_ids: Array<number>;
-}
-
 //------- Note Interfaces -------//
 export interface CreateNoteInterface {
     title: string;

@@ -2,6 +2,8 @@ import { Router, Request, Response } from "express";
 
 import toObj from "../config/responseStandart";
 
+import {API_VERSION, MIN_APP_VERSION} from "../xitem_api_server";
+
 import { authProtected } from "../middlewares/validateJWT";
 import { Roles , Comparisons, RoleCheck } from "../middlewares/checkRole";
 
@@ -30,7 +32,7 @@ routes.use("/statistic", [authProtected, RoleCheck.isEqualTo([Roles.SystemAdmini
 routes.get("/holidays/:year/:state_code", HolidayController.getHolidays);
 
 routes.get("/", function(request: Request, response: Response) {
-    const welcomeMsg = { API_Name: process.env.APP_NAME + " API" , Version: "0.9.2" , Documentation: request.headers.host + "/documentation"};
+    const welcomeMsg = { API_NAME: process.env.APP_NAME + " API", API_VERSION: API_VERSION, MIN_APP_VERSION: MIN_APP_VERSION, DOCUMENTATION: request.headers.host + "/documentation"};
     response.status(200).json(toObj(response,welcomeMsg));
 });
 

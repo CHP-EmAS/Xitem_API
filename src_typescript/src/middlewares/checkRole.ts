@@ -23,14 +23,14 @@ export const enum Comparisons {
 
 export class RoleCheck{
 
-  private static chachedRoles: Map<String,UserRoleModel> = new Map<String,UserRoleModel>();
+  private static cachedRoles: Map<String,UserRoleModel> = new Map<String,UserRoleModel>();
 
   private static async getRole(roleName: string): Promise<(UserRoleModel | null)> {
     //Get role from cache or database
     try {
       
-      if(this.chachedRoles.has(roleName)) {
-        const role: (UserRoleModel | undefined) = this.chachedRoles.get(roleName);
+      if(this.cachedRoles.has(roleName)) {
+        const role: (UserRoleModel | undefined) = this.cachedRoles.get(roleName);
 
         if(role == undefined) return null;
         return role;
@@ -39,7 +39,7 @@ export class RoleCheck{
       const requestedRole: (UserRoleModel | null) = await UserRoleModel.findByPk(roleName);
 
       if(requestedRole != null) {
-        this.chachedRoles.set(roleName,requestedRole);
+        this.cachedRoles.set(roleName,requestedRole);
       }
 
       return requestedRole;
