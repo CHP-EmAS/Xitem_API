@@ -1,4 +1,4 @@
-import { Router} from "express";
+import { Router } from "express";
 
 import CalendarController from "../controllers/calendarController";
 
@@ -26,7 +26,7 @@ router.use("/:calendar_id/event", event)
 //calendar voting routes
 //router.use("/:calendar_id/voting", [validatePathParameter, RoleCheck.compare(Comparisons.isGreaterOrEqualThan, Roles.Verified)], voting)
 
-//calendat note routes
+//calendar note routes
 router.use("/:calendar_id/note", [validatePathParameter, RoleCheck.compare(Comparisons.isGreaterOrEqualThan, Roles.Verified)], note)
 
 //calendar user routes

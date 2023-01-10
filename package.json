@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon out_javascript/src/xitem_api_server.js",
-    "dev": "nodemon src/app.ts",
+    "dev": "nodemon src_typescript/src/xitem_api_server.ts",
     "build": "tsc"
   },
   "repository": {

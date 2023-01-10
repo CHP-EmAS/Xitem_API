@@ -15,7 +15,7 @@ class API {
   private api: Application;
 
   constructor() {
-    this.api = express(); 
+    this.api = express();
     this.config();
 
     //Root
@@ -37,7 +37,7 @@ class API {
   }
 
   private config(): void {
-  
+
     //cors
     this.api.use(CorsHandler.cors);
 
@@ -52,7 +52,7 @@ class API {
     this.api.use(ErrorHandler.checkPreError);
 
     //logging incoming requests
-    if(JSON.parse(String(process.env.CONSOLE_LOG_REQUESTS)) ) {
+    if(Boolean(process.env.CONSOLE_LOG_REQUESTS)) {
       this.api.use("*", LoggingHandler.requestLogging);
     }
 
