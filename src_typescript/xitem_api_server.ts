@@ -4,7 +4,7 @@ dotenv.config();
 import api from "./api";
 
 const PORT = process.env.PORT || 3000;
-export const API_VERSION = "1.0.0";
+export const API_VERSION = process.env.npm_package_version || "Unknown";
 export const MIN_APP_VERSION = "1.3.0"
 
 console.log("########################## " + process.env.APP_NAME + " API Version: " + API_VERSION + " ##########################");
