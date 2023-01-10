@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "name": "echo -n 'Xitem API'",
-    "start": "pm2 out_javascript/xitem_api_server.js --name Xitem_API",
+    "start": "pm2 start out_javascript/xitem_api_server.js --name Xitem_API",
     "stop": "pm2 stop Xitem_API",
     "dev": "nodemon src_typescript/xitem_api_server.ts",
     "build": "tsc --build --verbose",
