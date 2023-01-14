@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import Sequelize  from "sequelize";
 import jwt from "jsonwebtoken";
-import uuid from "uuid";
+import { v4 as uuidv4 } from 'uuid';
 
 import toObj from "../config/responseStandart"
 import * as customError from "../config/errorCodes"
@@ -88,7 +88,7 @@ class CalendarController {
 
         let calendar = new CalendarModel();
 
-        calendar.calendar_id = uuid.v4();
+        calendar.calendar_id = uuidv4();
         calendar.calendar_name = fullCalendarName;
         calendar.can_join = requestParams.can_join;
         calendar.raw_color_legend = "{}"

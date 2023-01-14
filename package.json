@@ -5,9 +5,9 @@
   "main": "index.js",
   "scripts": {
     "name": "printf 'Xitem API'",
-    "start": "pm2 start out_javascript/xitem_api_server.js --name Xitem_API",
-    "stop": "pm2 delete Xitem_API",
-    "dev_start": "pm2 start out_javascript/xitem_api_server.js --name DEV_Xitem_API",
+    "start": "pm2 start",
+    "stop": "pm2 delete",
+    "dev": "nodemon src_typescript/xitem_api_server.ts",
     "build": "tsc --build --verbose",
     "clean": "tsc --build --clean"
   },
