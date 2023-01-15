@@ -45,14 +45,14 @@ CalendarUserLinkModel.init(
         defaultValue: false
     },
     color: {
-        type: DataTypes.BIGINT,
+        type: DataTypes.SMALLINT,
         allowNull: false,
-        defaultValue: 4294951175
+        defaultValue: 13
     },
     icon: {
-        type: DataTypes.NUMBER,
+        type: DataTypes.SMALLINT,
         allowNull: false,
-        defaultValue: 59701
+        defaultValue: 0
     }
 },
 {

@@ -42,9 +42,9 @@ NoteModel.init(
         allowNull: false,
     },
     color: {
-        type: DataTypes.BIGINT,
+        type: DataTypes.SMALLINT,
         allowNull: false,
-        defaultValue: 4294967295
+        defaultValue: 13
     },
     pinned: {
         type: DataTypes.BOOLEAN,

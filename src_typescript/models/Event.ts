@@ -51,9 +51,9 @@ EventModel.init(
         defaultValue: ""
     },
     color: {
-        type: DataTypes.BIGINT,
+        type: DataTypes.SMALLINT,
         allowNull: false,
-        defaultValue: 4294951175
+        defaultValue: 13
     },
     created_by_user: {
         type: DataTypes.UUIDV4,
