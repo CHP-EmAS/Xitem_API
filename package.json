@@ -2,7 +2,7 @@
   "name": "xitem_api",
   "version": "1.0.1",
   "description": "API for Xitem Calender App",
-  "main": "index.js",
+  "main": "src_typescript/xitem_api_server.ts",
   "scripts": {
     "name": "printf 'Xitem API'",
     "start": "pm2 start",

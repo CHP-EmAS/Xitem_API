@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 
 class LoggingHandler {
     public static async requestLogging(request: Request, response: Response, next: NextFunction) {
-        
+
         let url: string;
 
         if(request.originalUrl.length > 200) {
@@ -11,8 +11,8 @@ class LoggingHandler {
             url = request.originalUrl;
         }
 
-        console.log("[request] " + request.method + " " + url);
-    
+        console.log("🔵 " + request.method + " " + url);
+
         next();
     }
 }

@@ -44,7 +44,7 @@ NoteModel.init(
     color: {
         type: DataTypes.SMALLINT,
         allowNull: false,
-        defaultValue: 13
+        defaultValue: 0
     },
     pinned: {
         type: DataTypes.BOOLEAN,
@@ -58,8 +58,8 @@ NoteModel.init(
     }
 },
 {
-    timestamps: true, 
-    createdAt: 'creation_date', 
+    timestamps: true,
+    createdAt: 'creation_date',
     updatedAt: 'modification_date',
     freezeTableName: true,
     tableName: 'notes',
