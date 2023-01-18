@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 
-import multer from 'multer';
+import multer, {MulterError} from 'multer';
 import path from 'path';
 import * as filesystem from 'fs';
 import jwt from "jsonwebtoken";
@@ -75,12 +75,12 @@ class UserController {
        if(!user) return response.status(404).json(toObj(response, {Error: customError.userNotFound}));
 
        let countChanges: number = 0;
-       
+
        if(requestParams.birthday == null) {
            user.birthday = null;
        }
 
-       //change data 
+       //change data
        if(user.birthday != requestParams.birthday && requestParams.birthday != undefined){
            user.birthday = requestParams.birthday;
            countChanges++;
@@ -97,7 +97,7 @@ class UserController {
                return response.status(200).json(toObj(response,{Info: "User succesfully updated",Changes: countChanges}));
            })
            .catch((err: Error) => {
-               console.log(err); 
+               console.log(err);
                return response.status(500).json(toObj(response));
            });
     }
@@ -139,7 +139,7 @@ class UserController {
         }
 
         //get and validate user_id given in path
-        if(request.params.user_id != userPayload.user_id) 
+        if(request.params.user_id != userPayload.user_id)
         return response.status(403).json(toObj(response, {Error: customError.insufficientPermissions}));
 
         try {
@@ -186,7 +186,7 @@ class UserController {
         if(!user) {
             console.info("User (" + verifiedPayload.user_id + ") which is specified in account deletion payload does not exist")
             return response.status(400).json(toObj(response,{Error: customError.invalidToken})); //user not found
-        } 
+        }
 
         //check if iat and exp is specified in token
         const jwt_iat = verifiedPayload.iat;
@@ -195,8 +195,8 @@ class UserController {
         if(!jwt_iat || !jwt_exp) {
             console.info("User " + user.name + "(" + user.user_id + ") could not be deleted because parameter iat or exp is missing in payload")
             return response.status(400).json(toObj(response,{Error: customError.invalidToken}));
-        } 
-        
+        }
+
         const validPass = user.checkIfUnencryptedPasswordIsValid(requestParams.password);
         if(!validPass) return response.status(401).json(toObj(response, {Error: customError.authenticationFailed}));
 
@@ -206,7 +206,7 @@ class UserController {
             return response.status(200).json(toObj(response));
         })
         .catch((err: Error) => {
-            console.error(err); 
+            console.error(err);
             return response.status(500).json(toObj(response));
         });
 
@@ -226,23 +226,23 @@ class UserController {
     public static async getAssociatedCalendars(request: Request, response: Response) {
         //get and validate JWT Payload
         const userPayload: LocalPayloadInterface = response.locals.userPayload;
-        
+
         if(!userPayload) {
             console.error("Controller Error: Missing jwtpayload");
             return response.status(500).json(toObj(response));
         }
-        
+
         //get and validate user_id given in path
         const requested_user_id = request.params.user_id
         if(requested_user_id != userPayload.user_id) return response.status(403).json(toObj(response, {Error: customError.insufficientPermissions}));
-        
+
         try {
-            const calendars: Array<CalendarUserLinkModel> | null = await CalendarUserLinkModel.findAll({ 
-                where: { 
-                    user_id: requested_user_id 
+            const calendars: Array<CalendarUserLinkModel> | null = await CalendarUserLinkModel.findAll({
+                where: {
+                    user_id: requested_user_id
                 },
                 include: [{
-                    model: CalendarModel, 
+                    model: CalendarModel,
                     as: 'calendarObject',
                     attributes: ['calendar_id', 'calendar_name', 'can_join', 'raw_color_legend', 'creation_date']
                 }]
@@ -254,11 +254,11 @@ class UserController {
             let failed = false;
 
             for ( const listObject of calendars ) {
-                
+
                 let newAssociatedUser: AssociatedCalendarInterface = {
-                    calendarObject: listObject.calendarObject, 
-                    is_owner: listObject.is_owner, 
-                    can_create_events: listObject.can_create_events, 
+                    calendarObject: listObject.calendarObject,
+                    is_owner: listObject.is_owner,
+                    can_create_events: listObject.can_create_events,
                     can_edit_events: listObject.can_edit_events,
                     color: listObject.color,
                     icon: listObject.icon
@@ -268,7 +268,7 @@ class UserController {
             }
 
             if(failed) return response.status(500).json(toObj(response));
-            
+
             return response.status(200).json(toObj(response,{associated_calendars: responseList}))
         } catch ( error ) {
             console.error(error);
@@ -301,43 +301,38 @@ class UserController {
             return response.status(500).json(toObj(response));
         }
 
-        //prepare storage engine -> set destination path
-        const storage: multer.StorageEngine = multer.diskStorage({
-            filename: (request: Express.Request, file: Express.Multer.File, callback: (error: Error | null, filename: string) => void) => {
-                callback(null, user_to_patch + path.extname(file.originalname));
-            },
-            destination: 'static/images/profile_pictures/'
-        })
-        
-        //set filter to check if file end with .png
-        const fileFilter = (request: Request, file: Express.Multer.File, cb: any) => {
-            if (!file.originalname.match(/\.(png)$/)) {
-                return cb(new Error("Only .png images are allowed!"));
-            }
-            
-            cb(null, true);
-        };
+        const profilePictureUpload = multer({
+            storage: multer.diskStorage({
+                filename: (request: Express.Request, file: Express.Multer.File, callback: (error: Error | null, filename: string) => void) => {
+                    callback(null, user_to_patch + path.extname(file.originalname));
+                },
+                destination: 'static/images/profile_pictures/'
+            }),
+            limits: { fileSize: 1000000 * 5}, //5MB
+            fileFilter: async (request: Request, file: Express.Multer.File, callback: multer.FileFilterCallback) => {
+                if (file.mimetype != "image/jpeg") {
+                    return callback(new Error("Only .jpeg images are allowed!"));
+                }
 
-        //configure multer -> search for avatar
-        let upload = multer({
-            storage: storage, 
-            limits: { fileSize: 1024 * 1024 * 5}, //5MB
-            fileFilter: fileFilter
+                callback(null, true);
+            }
         }).single("avatar")
 
         //Upload the picture to destination
-        upload(request,response,function (error: any) {
-            
+        profilePictureUpload(request, response,function (error: any) {
             if(user && request.file) {
-                console.log("User " + user.name + "(" + user_to_patch + ") changes Avatar. Size: " + Number(request.file.size / 1000000) + "MB")
+                console.log("User " + user.name + "(" + user_to_patch + ") changes Avatar. Size: " + Number(request.file.size / 1000000).toFixed(2) + "MB")
             }
 
-            if( error instanceof Error ) {
-                console.error(error.name + ": " + error.message);
+            if( error instanceof MulterError ) {
+                console.error(error);
                 return response.status(413).json(toObj(response, {Error: customError.payloadTooLarge}));
+            } else if( error instanceof  Error) {
+                console.error(error);
+                return response.status(500).json(toObj(response));
             }
 
-            response.status(200).json(toObj(response,{Info: "Profile Picture succesfully updated"}));
+            response.status(200).json(toObj(response,{Info: "Profile Picture successfully updated"}));
         });
     }
 
@@ -386,7 +381,7 @@ class UserController {
         }
 
         //get and validate user_id given in path
-        if(request.params.user_id != userPayload.user_id) 
+        if(request.params.user_id != userPayload.user_id)
             return response.status(403).json(toObj(response, {Error: customError.insufficientPermissions}));
 
         const userID: string = userPayload.user_id;
@@ -399,7 +394,7 @@ class UserController {
 
             const user: (UserModel | null) = await UserModel.findOne({attributes: response_user_attr, where: {user_id: userID}, include: [{model: UserRoleModel, as: 'roleObject', attributes: ['full_name','description']}]});
             if(!user) return response.status(404).json(toObj(response, {Error: customError.userNotFound}));
-            
+
             informationString += "#### Nutzerinformationen ####\n\n";
             informationString += "ID             : " + user.user_id   + "\n";
             informationString += "Nutzername     : " + user.name                 + "\n";
@@ -407,25 +402,25 @@ class UserController {
             informationString += "Geburtstag     : " + user.birthday?.toString() + "\n";
             informationString += "Registriert am : " + user.registered_at.toString() + "\n";
             informationString += "Nutzer gebannt : " + (!user.active).toString()    + "\n";
-            informationString += "Status         : " + user.roleObject.full_name + "\n"; 
-            
+            informationString += "Status         : " + user.roleObject.full_name + "\n";
+
             //########## get calendar data ##########
             informationString += "\n#### Mitglied in Kalender ####\n";
 
-            const calendars: Array<CalendarUserLinkModel> = await CalendarUserLinkModel.findAll({ 
-                where: { 
+            const calendars: Array<CalendarUserLinkModel> = await CalendarUserLinkModel.findAll({
+                where: {
                     user_id: userID
                 },
                 include: [{
-                    model: CalendarModel, 
+                    model: CalendarModel,
                     as: 'calendarObject',
                     attributes: ['calendar_id', 'calendar_name', 'creation_date']
                 }]
             });
 
             for ( const listObject of calendars ) {
-                
-                informationString += "\n- " + listObject.calendarObject.calendar_id + "\n"; 
+
+                informationString += "\n- " + listObject.calendarObject.calendar_id + "\n";
                 informationString += "  Name                  : " + listObject.calendarObject.calendar_name + "\n";
                 informationString += "  Ist Administrator     : " + listObject.is_owner.toString() + "\n";
                 informationString += "  Kann Events erstellen : " + listObject.can_create_events.toString() + "\n";
@@ -434,21 +429,21 @@ class UserController {
                 informationString += "  Symbol                : " + listObject.icon.toString() + "\n";
                 informationString += "  Erstellt am           : " + listObject.calendarObject.creation_date.toString() + "\n";
             }
-            
+
             //########## get event data ##########
             informationString += "\n#### Erstellte Events ####\n";
 
             const response_event_attr = ['associated_calendar', 'event_id', 'title', 'description', "begin_date", 'end_date', 'creation_date', 'color', 'created_by_user', 'daylong', 'pinned_note'];
 
             const events: (Array<EventModel> | null) = await EventModel.findAll({
-                attributes: response_event_attr, 
+                attributes: response_event_attr,
                 where: {
                     created_by_user: userID
                 },
             });
 
             for ( const listObject of events ) {
-                
+
                 informationString += "\n- " + listObject.event_id.toString() + "\n";
                 informationString += "  Kalender    : " + listObject.associated_calendar + "\n";
                 informationString += "  Title       : " + listObject.title + "\n";
@@ -466,14 +461,14 @@ class UserController {
             const response_note_attr = ['note_id', 'title', 'content', "color", 'pinned', 'associated_calendar', 'owner_id', 'creation_date', 'modification_date'];
 
             const notes: (Array<NoteModel> | null) = await NoteModel.findAll({
-                attributes: response_note_attr, 
+                attributes: response_note_attr,
                 where: {
                     owner_id: userID
                 }
             });
 
             for ( const listObject of notes ) {
-                
+
                 informationString += "\n- " + listObject.note_id.toString() + "\n";
                 informationString += "  Titel       : " + listObject.title + "\n";
                 informationString += "  Inhalt      : " + listObject.content + "\n";
@@ -484,7 +479,7 @@ class UserController {
                 informationString += "  Geändert am : " + listObject.modification_date.toString() + "\n";
 
             }
-            
+
             //send email with token
             const mailError = await MailController.sendUserInformationMail(user, informationString);
 
