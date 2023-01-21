@@ -310,9 +310,7 @@ class UserController {
             }),
             limits: { fileSize: 1000000 * 5}, //5MB
             fileFilter: async (request: Request, file: Express.Multer.File, callback: multer.FileFilterCallback) => {
-                console.log(file)
-
-                console.log(file.buffer.toString('hex',0,4));
+                console.log(request)
 
                 if (file.mimetype != "image/jpeg") {
                     return callback(new Error("Only .jpeg images are allowed!"));
