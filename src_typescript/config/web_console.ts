@@ -1,7 +1,8 @@
+/*
 import {Server} from "http";
 import SocketIO from "socket.io";
 
-import * as customError from "../config/errorCodes" 
+import * as customError from "../config/errorCodes"
 import { validateToken, TokenType } from "../middlewares/validateJWT"
 import { LocalPayloadInterface } from "../validation/interfaces";
 import { Roles, RoleCheck } from "../middlewares/checkRole"
@@ -18,8 +19,8 @@ class Web_Console {
     constructor(httpServer: Server, pathToWebSocket?: string, validationFunction?: (socket: SocketIO.Socket, next: Function) => void) {
         this.httpServer = httpServer;
         this.validationFunction = (socket: SocketIO.Socket, next: Function) => {return next();}
-            
-        if(pathToWebSocket) 
+
+        if(pathToWebSocket)
             this.webSocketPath = pathToWebSocket;
 
         if(validationFunction)
@@ -28,9 +29,9 @@ class Web_Console {
 
     public start() {
         if(this.io) {
-            this.io.close; 
+            this.io.close;
         }
-            
+
         this.io = SocketIO(this.httpServer, {
             path: this.webSocketPath,
             handlePreflightRequest: this.handlePreflightRequest
@@ -61,20 +62,20 @@ class Web_Console {
     private handlePreflightRequest(request: any, response: any) {
         const headers = {
             "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept, user-token",
-            "Access-Control-Allow-Origin": request.headers.origin, 
+            "Access-Control-Allow-Origin": request.headers.origin,
             "Access-Control-Allow-Credentials": true
         };
         response.writeHead(200, headers);
         response.end();
     }
-    
+
     private overwriteOutput(io: SocketIO.Server) {
-        
+
         const originalStdoutWrite = process.stdout.write.bind(process.stdout);
         const originalStderrWrite = process.stderr.write.bind(process.stderr);
 
         process.stdout.write = function(chunk: any, encoding?: any , next?: any ): boolean {
-            
+
             if (typeof chunk === 'string') {
                 io.emit("log",{msg: chunk});
             }
@@ -83,7 +84,7 @@ class Web_Console {
         };
 
         process.stderr.write = function(chunk: any, encoding?: any , next?: any ): boolean {
-            
+
             if (typeof chunk === 'string') {
                 io.emit("err",{msg: chunk});
             }
@@ -141,4 +142,4 @@ export const validateUserAccess = async (socket: SocketIO.Socket, next: Function
         }
     }
 
-};
+};*/
