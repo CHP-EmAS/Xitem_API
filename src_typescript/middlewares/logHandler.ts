@@ -14,16 +14,16 @@ class LogHandler {
 
         switch(request.method) {
             case "GET":
-                console.log("[" + timeStamp + "]🔵 GET  " + url)
+                console.log("[" + timeStamp + "]🔵 GET    " + url)
                 break
             case "POST":
-                console.log("[" + timeStamp + "]🟢 POST " + url)
+                console.log("[" + timeStamp + "]🟢 POST   " + url)
                 break
             case "PATCH":
-                console.log("[" + timeStamp + "]🟡 PATCH " + url)
+                console.log("[" + timeStamp + "]🟡 PATCH  " + url)
                 break
             case "PUT":
-                console.log("[" + timeStamp + "]🟠 PUT  " + url)
+                console.log("[" + timeStamp + "]🟠 PUT    " + url)
                 break
             case "DELETE":
                 console.log("[" + timeStamp + "]🔴 DELETE " + url)
