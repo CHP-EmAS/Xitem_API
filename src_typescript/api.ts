@@ -7,7 +7,7 @@ import * as bodyParser from "body-parser";
 import routes from "./routes/routes";
 import ErrorHandler from "./middlewares/errorHandler"
 import CorsHandler from "./middlewares/corsHandler"
-import LoggingHandler from "./middlewares/loggingHandler"
+import LogHandler from "./middlewares/logHandler"
 import {database} from "./config/database";
 import MailController from "./controllers/mailController";
 
@@ -53,7 +53,7 @@ class API {
 
     //logging incoming requests
     if(Boolean(process.env.CONSOLE_LOG_REQUESTS)) {
-      this.api.use("*", LoggingHandler.requestLogging);
+      this.api.use("*", LogHandler.requestLogger);
     }
 
     //Static Files

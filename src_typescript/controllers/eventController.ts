@@ -13,7 +13,6 @@ import CalendarController from "./calendarController"
 import { NoteModel } from "../models/Notes";
 
 class EventController {
-
     //GET Event Info (JWT)
     public static async getEventInfo(request: Request, response: Response) {
         //get and validate JWT Payload
@@ -80,9 +79,7 @@ class EventController {
 
         let event = new EventModel();
 
-        if(requestParams.color) 
-            event.color = requestParams.color;
-        
+        event.color = requestParams.color;
         event.begin_date = requestParams.begin_date;
         event.end_date = requestParams.end_date;
         event.daylong = requestParams.daylong;
@@ -190,7 +187,7 @@ class EventController {
                 countChanges++;
             }
         
-            if(event.color != requestParams.color && requestParams.color){
+            if(event.color != requestParams.color && requestParams.color != undefined){
                 event.color = requestParams.color;
                 countChanges++;
             }

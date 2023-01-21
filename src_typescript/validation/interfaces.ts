@@ -168,7 +168,7 @@ export interface CreateEventInterface {
     title: string;
     daylong: boolean;
     description?: string;
-    color?: number;
+    color: number;
     pinned_note?: number;
 }
 
