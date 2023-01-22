@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 
-import multer, {MulterError} from 'multer';
+import multer, {MulterError, ErrorCode} from 'multer';
 import path from 'path';
 import * as filesystem from 'fs';
 import jwt from "jsonwebtoken";
@@ -18,6 +18,7 @@ import { CalendarModel } from "../models/Calendar";
 import { EventModel } from "../models/Event";
 import { NoteModel } from "../models/Notes";
 import MailController from "./mailController";
+import {invalidFile} from "../config/errorCodes";
 
 class UserController {
 
@@ -310,10 +311,10 @@ class UserController {
             }),
             limits: { fileSize: 1000000 * 5}, //5MB
             fileFilter: async (request: Request, file: Express.Multer.File, callback: multer.FileFilterCallback) => {
-                console.log(request)
+                const extension: string = path.extname(file.originalname);
 
-                if (file.mimetype != "image/jpeg") {
-                    return callback(new Error("Only .jpeg images are allowed!"));
+                if (file.mimetype != "image/jpeg" || !(extension == ".jpg" || extension == ".jpeg")) {
+                    return callback(new MulterError("LIMIT_UNEXPECTED_FILE"));
                 }
 
                 callback(null, true);
@@ -321,21 +322,28 @@ class UserController {
         }).single("avatar")
 
         //Upload the picture to destination
-        profilePictureUpload(request, response,function (error: any) {
+        await profilePictureUpload(request, response,function (error: any) {
             if(user && request.file) {
                 console.log("User " + user.name + "(" + user_to_patch + ") changes Avatar. Size: " + Number(request.file.size / 1000000).toFixed(2) + "MB")
             }
 
+            console.log("TEST")
+
             if( error instanceof MulterError ) {
-                console.error(error);
-                return response.status(413).json(toObj(response, {Error: customError.payloadTooLarge}));
+                if(error.code == "LIMIT_FILE_SIZE") {
+                    return response.status(413).json(toObj(response, {Error: customError.payloadTooLarge}));
+                } else if (error.code == "LIMIT_UNEXPECTED_FILE") {
+                    return response.status(400).json(toObj(response, {Error: customError.invalidFile}));
+                }
             } else if( error instanceof  Error) {
                 console.error(error);
                 return response.status(500).json(toObj(response));
             }
-
-            response.status(200).json(toObj(response,{Info: "Profile Picture successfully updated"}));
         });
+
+        console.log("TEST 2")
+
+        response.status(200).json(toObj(response,{Info: "Profile Picture successfully updated"}));
     }
 
     //GET Profile Picture

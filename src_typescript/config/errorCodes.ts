@@ -55,4 +55,5 @@ export const invalidTitle       = "invalid_title";
 export const invalidDate        = "invalid_date";
 export const invalidColor       = "invalid_color";
 export const invalidJson        = "invalid_json";
+export const invalidFile        = "invalid_file";
 export const payloadTooLarge    = "payload_too_large";
