@@ -8,16 +8,18 @@ import { Roles } from "../middlewares/checkRole";
 //------- Class for User Model-------//
 export class UserModel extends Model {
     public user_id!: string;
-    public email!: string;
     public name!: string;
-    private hash_passwd!: string;
-    public password_changed_at!: Date;
+    public email!: string;
     public birthday!: ( Date | null );
     public active!: boolean;
     public role!: string;
     public roleObject!: UserRoleModel;
+    public profile_picture_hash!: string;
     public readonly registered_at!: Date;
-  
+
+    private hash_passwd!: string;
+    public password_changed_at!: Date;
+
     hashPassword(password: string): void {
         const salt: string = bcrypt.genSaltSync(10);
         this.hash_passwd = bcrypt.hashSync(password, salt);
@@ -44,15 +46,6 @@ UserModel.init(
         type: DataTypes.TEXT,
         allowNull: false,
     },
-    hash_passwd: {
-        type: DataTypes.TEXT,
-        allowNull: false,
-    },
-    password_changed_at: {
-        type: DataTypes.DATE,
-        allowNull: false,
-        defaultValue: Date.now()
-    },
     birthday: {
         type: DataTypes.DATEONLY,
         allowNull: true,
@@ -67,7 +60,20 @@ UserModel.init(
         type: DataTypes.STRING(10),
         allowNull: false,
         defaultValue: Roles.Unverified
-    }
+    },
+    profile_picture_hash: {
+        type: DataTypes.TEXT,
+        allowNull: false,
+    },
+    hash_passwd: {
+        type: DataTypes.TEXT,
+        allowNull: false,
+    },
+    password_changed_at: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        defaultValue: Date.now()
+    },
 },
 {
     timestamps: true, 

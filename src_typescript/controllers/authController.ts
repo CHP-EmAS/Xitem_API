@@ -128,37 +128,38 @@ class AuthController {
   }
   public static async verifyEmail(request: Request, response: Response) {
     //get verify key given in path
-    const requestParams: ValidationEmailInterface = request.body;
+    const requestParams: ValidationEmailInterface = request.body
 
-    const { error } = validateEmailSchema.validate(requestParams);
-    if(error) return response.status(400).json(toObj(response,{Error: error.message}));
+    const { error } = validateEmailSchema.validate(requestParams)
+    if(error) return response.status(400).json(toObj(response,{Error: error.message}))
 
     //Try to validate the key
     try {
 
       //verify
-      const verifiedPayload: JWTEmailVerificationInterface = <JWTEmailVerificationInterface>jwt.verify(requestParams.validation_key, <jwt.Secret>(process.env.JWT_EMAIL_SECRET));
+      const verifiedPayload: JWTEmailVerificationInterface = <JWTEmailVerificationInterface>jwt.verify(requestParams.validation_key, <jwt.Secret>(process.env.JWT_EMAIL_SECRET))
 
       //check if iat and exp is specified in token
-      const jwt_iat = verifiedPayload.iat;
-      const jwt_exp = verifiedPayload.exp;
+      const jwt_iat = verifiedPayload.iat
+      const jwt_exp = verifiedPayload.exp
 
       if(!jwt_iat || !jwt_exp) {
         console.info("Email of User " + verifiedPayload.name + "(" + verifiedPayload.email + ") could not be verified because parameter iat or exp is missing in payload")
-        return response.status(400).json(toObj(response,{Error: customError.invalidToken}));
+        return response.status(400).json(toObj(response,{Error: customError.invalidToken}))
       }
 
-      const existingUser: (UserModel | null) = await UserModel.findOne({ where: {email: verifiedPayload.email} });
-      if(existingUser) return response.status(400).json(toObj(response,{Error: customError.emailExistsError}));
+      const existingUser: (UserModel | null) = await UserModel.findOne({ where: {email: verifiedPayload.email} })
+      if(existingUser) return response.status(400).json(toObj(response,{Error: customError.emailExistsError}))
 
-      let user = new UserModel({email: verifiedPayload.email, name: verifiedPayload.name});
+      let user = new UserModel({email: verifiedPayload.email, name: verifiedPayload.name})
 
-      user.hashPassword(requestParams.password);
+      user.hashPassword(requestParams.password)
       user.password_changed_at = new Date(Date.now())
 
-      user.user_id = uuidv4();
-      user.active = true;
-      user.role = Roles.Verified;
+      user.user_id = uuidv4()
+      user.active = true
+      user.role = Roles.Verified
+      user.profile_picture_hash = ""
 
       if(verifiedPayload.birthday) {
         user.birthday = verifiedPayload.birthday;

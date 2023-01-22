@@ -1,8 +1,9 @@
 import { Request, Response } from "express";
 
-import multer, {MulterError, ErrorCode} from 'multer';
+import multer, {MulterError} from 'multer';
 import path from 'path';
 import * as filesystem from 'fs';
+import * as crypto from "crypto";
 import jwt from "jsonwebtoken";
 
 import toObj from "../config/responseStandart"
@@ -18,7 +19,6 @@ import { CalendarModel } from "../models/Calendar";
 import { EventModel } from "../models/Event";
 import { NoteModel } from "../models/Notes";
 import MailController from "./mailController";
-import {invalidFile} from "../config/errorCodes";
 
 class UserController {
 
@@ -39,8 +39,8 @@ class UserController {
         let response_user_attr: Array<string>;
 
         //find user in database
-        if(requested_user_id == userPayload.user_id) response_user_attr = ['user_id','name','email','birthday','registered_at'];
-        else response_user_attr = ['user_id','name','birthday']
+        if(requested_user_id == userPayload.user_id) response_user_attr = ['user_id','name','email','birthday','profile_picture_hash','registered_at'];
+        else response_user_attr = ['user_id','name','birthday','profile_picture_hash']
 
         try{
             const user: (UserModel | null) = await UserModel.findOne({attributes: response_user_attr, where: {user_id: requested_user_id}, include: [{model: UserRoleModel, as: 'roleObject', attributes: [['full_name','role'],'description']}]});
@@ -296,7 +296,9 @@ class UserController {
 
         try {
             user = await UserModel.findByPk(user_to_patch);
-            if(!user) return response.status(404).json(toObj(response, {Error: customError.userNotFound}));
+            if(!user) {
+                return response.status(404).json(toObj(response, {Error: customError.userNotFound}));
+            }
         } catch ( error ) {
             console.log(error);
             return response.status(500).json(toObj(response));
@@ -322,28 +324,33 @@ class UserController {
         }).single("avatar")
 
         //Upload the picture to destination
-        await profilePictureUpload(request, response,function (error: any) {
-            if(user && request.file) {
-                console.log("User " + user.name + "(" + user_to_patch + ") changes Avatar. Size: " + Number(request.file.size / 1000000).toFixed(2) + "MB")
-            }
-
-            console.log("TEST")
-
+        profilePictureUpload(request, response,function (error: any) {
             if( error instanceof MulterError ) {
                 if(error.code == "LIMIT_FILE_SIZE") {
                     return response.status(413).json(toObj(response, {Error: customError.payloadTooLarge}));
                 } else if (error.code == "LIMIT_UNEXPECTED_FILE") {
                     return response.status(400).json(toObj(response, {Error: customError.invalidFile}));
                 }
-            } else if( error instanceof  Error) {
+            } else if( error instanceof Error) {
                 console.error(error);
                 return response.status(500).json(toObj(response));
             }
+
+            if(user && request.file) {
+                console.log("User " + user.name + "(" + user.user_id + ") changes Avatar. Size: " + Number(request.file.size / 1000000).toFixed(2) + "MB")
+
+                const picturePath: string = path.join(process.cwd(), "static", "images", "profile_pictures", user.user_id + ".png");
+                const profilePictureBuffer = filesystem.readFileSync(picturePath);
+                const hashSum = crypto.createHash('SHA256');
+                hashSum.update(profilePictureBuffer);
+
+                const hex = hashSum.digest('hex');
+
+                console.log(hex);
+            }
+
+            response.status(200).json(toObj(response,{Info: "Profile Picture successfully updated"}));
         });
-
-        console.log("TEST 2")
-
-        response.status(200).json(toObj(response,{Info: "Profile Picture successfully updated"}));
     }
 
     //GET Profile Picture
