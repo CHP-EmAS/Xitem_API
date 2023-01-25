@@ -23,11 +23,8 @@ class UploadHandler {
     }
 
     public static readonly profilePictureUploadMiddleware = multer({
-        storage: multer.diskStorage({
-            filename: this.profilePictureFileNameBuilder,
-            destination: '/tmp/upload'
-        }),
-        limits: { fileSize: 1000000 * 5}, //5MB
+        storage: multer.memoryStorage(),
+        limits: { fileSize: 1000000 * 3}, //5MB
         fileFilter: this.profilePictureFileFilter
     }).single("avatar")
 
@@ -39,7 +36,7 @@ class UploadHandler {
             return;
         }
 
-        callback(null, user_to_patch + path.extname(file.originalname));
+        callback(null, user_to_patch);
     }
 
     private static profilePictureFileFilter(request: Request, file: Express.Multer.File, callback: multer.FileFilterCallback): void {

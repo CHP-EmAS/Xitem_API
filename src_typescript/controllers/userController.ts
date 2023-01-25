@@ -20,6 +20,7 @@ import { EventModel } from "../models/Event";
 import { NoteModel } from "../models/Notes";
 import MailController from "./mailController";
 import UploadHandler from "../middlewares/uploadHandler";
+import * as buffer from "buffer";
 
 class UserController {
 
@@ -305,20 +306,21 @@ class UserController {
                 return response.status(500).json(toObj(response))
             }
 
-            console.log("User <" + user_to_patch + "> uploaded Avatar. Size: " + Number(request.file.size / 1000000).toFixed(2) + "MB.\nUploaded to: " + request.file.path);
+            console.log("User <" + user_to_patch + "> uploaded Avatar. Size: " + Number(request.file.size / 1000000).toFixed(2) + "MB.\nUploaded to: " + request.file.path)
 
             const uploadPath: string = request.file.path
-            const destinationPath: string = path.join(process.cwd(), "static", "images", "profile_pictures", user_to_patch);
+            const destinationPath: string = path.join(process.cwd(), "static", "images", "profile_pictures", user_to_patch)
 
-            const profilePictureBuffer: Buffer = filesystem.readFileSync(uploadPath);
-            const magicNumber: string = profilePictureBuffer.toString("hex",0,8).toUpperCase();
+            const profilePictureBuffer: Buffer = filesystem.readFileSync(uploadPath)
 
-            const hashSum = crypto.createHash('SHA256');
-            hashSum.update(profilePictureBuffer);
-            const hexKey = hashSum.digest('hex');
+            const fileType: string = this.getFileType(profilePictureBuffer)
+            if(fileType == "invalid") {
+                return response.status(400).json(toObj(response, {Error: customError.invalidFile}));
+            }
 
-            console.log(magicNumber);
-            console.log(hexKey);
+
+            const hexKey: string = this.hashFile(profilePictureBuffer)
+            console.log(fileType);
 
             return response.status(200).json(toObj(response))
         })
@@ -483,6 +485,31 @@ class UserController {
             console.error(error);
             return response.status(500).json(toObj(response));
         }
+    }
+
+    private static getFileType(fileBuffer: Buffer): string {
+        const magicNumber: string = fileBuffer.toString("hex",0,8).toUpperCase()
+
+        if(magicNumber == "89504E470D0A1A0A") {
+            return "png"
+        }
+
+        if(magicNumber.slice(0, 6) == "FFD8FF") {
+            return "jpg"
+        }
+
+        if(magicNumber.slice(0, 8) == "47494638") {
+            return "gif"
+        }
+
+        return "invalid"
+    }
+
+    private static hashFile(fileBuffer: Buffer): string {
+        const hashSum = crypto.createHash('SHA256')
+        hashSum.update(fileBuffer)
+
+        return hashSum.digest('hex')
     }
 }
 
