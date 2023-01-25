@@ -282,12 +282,12 @@ class UserController {
     public static async changeProfilePicture(request: Request, response: Response) {
         UploadHandler.profilePictureUploadMiddleware(request, response, (error) => {
             if( error instanceof MulterError ) {
+                console.error(error);
                 if(error.code == "LIMIT_FILE_SIZE") {
                     return response.status(413).json(toObj(response, {Error: customError.payloadTooLarge}));
                 } else if (error.code == "LIMIT_UNEXPECTED_FILE") {
                     return response.status(400).json(toObj(response, {Error: customError.invalidFile}));
                 }
-                console.error(error)
             } else if( error instanceof Error) {
                 console.error(error);
                 return response.status(500).json(toObj(response));
