@@ -287,6 +287,7 @@ class UserController {
                 } else if (error.code == "LIMIT_UNEXPECTED_FILE") {
                     return response.status(400).json(toObj(response, {Error: customError.invalidFile}));
                 }
+                console.error(error)
             } else if( error instanceof Error) {
                 console.error(error);
                 return response.status(500).json(toObj(response));
@@ -319,6 +320,8 @@ class UserController {
 
             console.log(magicNumber);
             console.log(hexKey);
+
+            return response.status(200).json(toObj(response))
         })
     }
 
