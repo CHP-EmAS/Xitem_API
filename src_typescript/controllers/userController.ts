@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 
-import multer, {MulterError} from 'multer';
+import { MulterError } from 'multer';
 import path from 'path';
 import * as filesystem from 'fs';
 import * as crypto from "crypto";
@@ -19,6 +19,7 @@ import { CalendarModel } from "../models/Calendar";
 import { EventModel } from "../models/Event";
 import { NoteModel } from "../models/Notes";
 import MailController from "./mailController";
+import UploadHandler from "../middlewares/uploadHandler";
 
 class UserController {
 
@@ -279,52 +280,7 @@ class UserController {
 
     //POST Change Profile Picture (JWT)
     public static async changeProfilePicture(request: Request, response: Response) {
-        //get and validate JWT Payload
-        const userPayload: LocalPayloadInterface = response.locals.userPayload;
-
-        if(!userPayload) {
-            console.error("Controller Error: Missing userPayload");
-            return response.status(500).json(toObj(response));
-        }
-
-        //get and validate user_id given in path
-        const user_to_patch = request.params.user_id;
-        if(user_to_patch != userPayload.user_id) return response.status(403).json(toObj(response, {Error: customError.insufficientPermissions}));
-
-        //find user in database
-        let user: UserModel | null;
-
-        try {
-            user = await UserModel.findByPk(user_to_patch);
-            if(!user) {
-                return response.status(404).json(toObj(response, {Error: customError.userNotFound}));
-            }
-        } catch ( error ) {
-            console.log(error);
-            return response.status(500).json(toObj(response));
-        }
-
-        const profilePictureUpload = multer({
-            storage: multer.diskStorage({
-                filename: (request: Express.Request, file: Express.Multer.File, callback: (error: Error | null, filename: string) => void) => {
-                    callback(null, user_to_patch + path.extname(file.originalname));
-                },
-                destination: 'static/images/profile_pictures/'
-            }),
-            limits: { fileSize: 1000000 * 5}, //5MB
-            fileFilter: async (request: Request, file: Express.Multer.File, callback: multer.FileFilterCallback) => {
-                const extension: string = path.extname(file.originalname);
-
-                if (file.mimetype != "image/jpeg" || !(extension == ".jpg" || extension == ".jpeg")) {
-                    return callback(new MulterError("LIMIT_UNEXPECTED_FILE"));
-                }
-
-                callback(null, true);
-            }
-        }).single("avatar")
-
-        //Upload the picture to destination
-        profilePictureUpload(request, response,function (error: any) {
+        UploadHandler.profilePictureUploadMiddleware(request, response, (error) => {
             if( error instanceof MulterError ) {
                 if(error.code == "LIMIT_FILE_SIZE") {
                     return response.status(413).json(toObj(response, {Error: customError.payloadTooLarge}));
@@ -336,21 +292,34 @@ class UserController {
                 return response.status(500).json(toObj(response));
             }
 
-            if(user && request.file) {
-                console.log("User " + user.name + "(" + user.user_id + ") changes Avatar. Size: " + Number(request.file.size / 1000000).toFixed(2) + "MB")
+            const user_to_patch: (string | null) = request.params.user_id;
 
-                const picturePath: string = path.join(process.cwd(), "static", "images", "profile_pictures", user.user_id + ".png");
-                const profilePictureBuffer = filesystem.readFileSync(picturePath);
-                const hashSum = crypto.createHash('SHA256');
-                hashSum.update(profilePictureBuffer);
-
-                const hex = hashSum.digest('hex');
-
-                console.log(hex);
+            if(!user_to_patch) {
+                console.error("Profile Picture post upload error: No user_id found in request path parameters")
+                return response.status(500).json(toObj(response))
             }
 
-            response.status(200).json(toObj(response,{Info: "Profile Picture successfully updated"}));
-        });
+            if(!request.file) {
+                console.error("Profile Picture post upload error: No file info found in request path parameters")
+                return response.status(500).json(toObj(response))
+            }
+
+            console.log("User <" + user_to_patch + "> uploaded Avatar. Size: " + Number(request.file.size / 1000000).toFixed(2) + "MB.\nUploaded to: " + request.file.path);
+
+            const uploadPath: string = request.file.path
+            const destinationPath: string = path.join(process.cwd(), "static", "images", "profile_pictures", user_to_patch + ".jpg");
+
+            const profilePictureBuffer: Buffer = filesystem.readFileSync(uploadPath);
+
+            const magicNumber: string = profilePictureBuffer.toString("hex",0,4);
+
+            const hashSum = crypto.createHash('SHA256');
+            hashSum.update(profilePictureBuffer);
+            const hexKey = hashSum.digest('hex');
+
+            console.log(magicNumber);
+            console.log(hexKey);
+        })
     }
 
     //GET Profile Picture
