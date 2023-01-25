@@ -45,7 +45,7 @@ class UploadHandler {
     private static profilePictureFileFilter(request: Request, file: Express.Multer.File, callback: multer.FileFilterCallback): void {
         const extension: string = path.extname(file.originalname);
 
-        if (file.mimetype != "image/jpeg" || !(extension == ".jpg" || extension == ".jpeg")) {
+        if (!(file.mimetype == "image/jpeg" || file.mimetype == "image/png" || file.mimetype == "image/gif")) {
             return callback(new MulterError("LIMIT_UNEXPECTED_FILE"));
         }
 

@@ -308,11 +308,10 @@ class UserController {
             console.log("User <" + user_to_patch + "> uploaded Avatar. Size: " + Number(request.file.size / 1000000).toFixed(2) + "MB.\nUploaded to: " + request.file.path);
 
             const uploadPath: string = request.file.path
-            const destinationPath: string = path.join(process.cwd(), "static", "images", "profile_pictures", user_to_patch + ".jpg");
+            const destinationPath: string = path.join(process.cwd(), "static", "images", "profile_pictures", user_to_patch);
 
             const profilePictureBuffer: Buffer = filesystem.readFileSync(uploadPath);
-
-            const magicNumber: string = profilePictureBuffer.toString("hex",0,4);
+            const magicNumber: string = profilePictureBuffer.toString("hex",0,8).toUpperCase();
 
             const hashSum = crypto.createHash('SHA256');
             hashSum.update(profilePictureBuffer);
