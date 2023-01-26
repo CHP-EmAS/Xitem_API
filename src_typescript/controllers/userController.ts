@@ -330,7 +330,7 @@ class UserController {
                 return response.status(500).json(toObj(response));
             });
 
-            const destinationPath: string = path.join(process.cwd(), "static", "images", "profile_pictures", user_to_patch + "." + fileType.toString())
+            const destinationPath: string = path.join(process.cwd(), "static", "images", "profile_pictures", user_to_patch)
             filesystem.writeFileSync(destinationPath, request.file.buffer);
 
             return response.status(200).json(toObj(response))
@@ -339,24 +339,18 @@ class UserController {
 
     //GET Profile Picture
     public static async getProfilePicture(request: Request, response: Response) {
-        //get user_id given in path
-        const user_id = request.params.user_id;
-
-        //find user in database
         try {
+            //get user_id given in path
+            const user_id = request.params.user_id;
+
+            //find user in database
             const user: UserModel | null = await UserModel.findByPk(user_id);
             if(!user) return response.status(404).json(toObj(response, {Error: customError.userNotFound}));
-        } catch ( error ) {
-            console.log(error);
-            return response.status(500).json(toObj(response));
-        }
 
-        //set Paths
-        const picturePath: string = path.join(process.cwd(), "static", "images", "profile_pictures", user_id + ".png");
-        const defaultPath: string = path.join(process.cwd(), "static", "images", "default-profile.png");
+            //set Paths
+            const picturePath: string = path.join(process.cwd(), "static", "images", "profile_pictures", user_id);
+            const defaultPath: string = path.join(process.cwd(), "static", "images", "default-profile.png");
 
-        //check on paths available and return profile image
-        try {
             if (filesystem.existsSync(picturePath)) {
                 response.status(200).sendFile(picturePath);
             } else if (filesystem.existsSync(defaultPath)) {
@@ -365,10 +359,9 @@ class UserController {
                 console.error("Error: No default profile_picture was found in '" + defaultPath + "'!");
                 response.status(500).json(toObj(response));
             }
-
-        } catch( error ) {
-            console.error(error)
-            response.status(500).json(toObj(response));
+        } catch ( error ) {
+            console.log(error);
+            return response.status(500).json(toObj(response));
         }
     }
 
