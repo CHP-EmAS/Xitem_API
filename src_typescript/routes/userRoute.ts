@@ -25,7 +25,7 @@ router.get("/calendars", [authProtected, validatePathParameter], UserController.
 router.post("/infomail", [authProtected, validatePathParameter], UserController.generateUserInformationEmail)
 
 //user avatar routes
-router.put("/avatar", [authProtected, validatePathParameter, UploadHandler.checkProfilePictureUploadPermissions], UserController.changeProfilePicture)
+router.put("/avatar", [authProtected, validatePathParameter], UserController.changeProfilePicture)
 router.get("/avatar", [validatePathParameter], UserController.getProfilePicture)
 
 export default router
