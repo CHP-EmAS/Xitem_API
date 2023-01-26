@@ -3,7 +3,6 @@ import { Request, Response } from "express";
 import { MulterError } from 'multer';
 import path from 'path';
 import * as filesystem from 'fs';
-import * as crypto from "crypto";
 import jwt from "jsonwebtoken";
 
 import toObj from "../config/responseStandart"
@@ -19,7 +18,7 @@ import { CalendarModel } from "../models/Calendar";
 import { EventModel } from "../models/Event";
 import { NoteModel } from "../models/Notes";
 import MailController from "./mailController";
-import UploadHandler from "../middlewares/uploadHandler";
+import UploadHandler, {FileType} from "../middlewares/uploadHandler";
 import * as buffer from "buffer";
 
 class UserController {
@@ -281,7 +280,23 @@ class UserController {
 
     //POST Change Profile Picture (JWT)
     public static async changeProfilePicture(request: Request, response: Response) {
-        UploadHandler.profilePictureUploadMiddleware(request, response, (error) => {
+        const userPayload: LocalPayloadInterface = response.locals.userPayload;
+
+        if(!userPayload) {
+            console.error("Controller Error: Missing userPayload");
+            return response.status(500).json(toObj(response));
+        }
+
+        //get and validate user_id given in path
+        const user_to_patch = request.params.user_id;
+        if(user_to_patch != userPayload.user_id) return response.status(403).json(toObj(response, {Error: customError.insufficientPermissions}));
+
+        let user: (UserModel | null) = await UserModel.findByPk(user_to_patch);
+        if(!user) {
+            return response.status(404).json(toObj(response, {Error: customError.userNotFound}));
+        }
+
+        UploadHandler.profilePictureUploadMiddleware(request, response, async (error) => {
             if( error instanceof MulterError ) {
                 console.error(error);
                 if(error.code == "LIMIT_FILE_SIZE") {
@@ -294,33 +309,29 @@ class UserController {
                 return response.status(500).json(toObj(response));
             }
 
-            const user_to_patch: (string | null) = request.params.user_id;
-
-            if(!user_to_patch) {
-                console.error("Profile Picture post upload error: No user_id found in request path parameters")
+            if(!request.file || !user) {
+                console.error("Profile Picture post upload error: No file or User info found in request path parameters")
                 return response.status(500).json(toObj(response))
             }
 
-            if(!request.file) {
-                console.error("Profile Picture post upload error: No file info found in request path parameters")
-                return response.status(500).json(toObj(response))
-            }
+            console.log("User <" + user_to_patch + "> uploaded Avatar. Size: " + Number(request.file.size / 1000000).toFixed(2) + "MB.")
 
-            console.log("User <" + user_to_patch + "> uploaded Avatar. Size: " + Number(request.file.size / 1000000).toFixed(2) + "MB.\nUploaded to: " + request.file.path)
-
-            const uploadPath: string = request.file.path
-            const destinationPath: string = path.join(process.cwd(), "static", "images", "profile_pictures", user_to_patch)
-
-            const profilePictureBuffer: Buffer = filesystem.readFileSync(uploadPath)
-
-            const fileType: string = this.getFileType(profilePictureBuffer)
-            if(fileType == "invalid") {
+            const fileType: FileType = UploadHandler.getFileType(request.file.buffer)
+            if(fileType == FileType.INVALID) {
                 return response.status(400).json(toObj(response, {Error: customError.invalidFile}));
             }
 
+            const hexKey: string = UploadHandler.hashFile(request.file.buffer)
+            console.log(fileType + hexKey);
 
-            const hexKey: string = this.hashFile(profilePictureBuffer)
-            console.log(fileType);
+            user.profile_picture_hash = fileType + hexKey;
+            await user.save().catch((err: Error) => {
+                console.log(err);
+                return response.status(500).json(toObj(response));
+            });
+
+            const destinationPath: string = path.join(process.cwd(), "static", "images", "profile_pictures", user_to_patch, ".", fileType.toString())
+            filesystem.writeFileSync(destinationPath, buffer);
 
             return response.status(200).json(toObj(response))
         })
@@ -485,31 +496,6 @@ class UserController {
             console.error(error);
             return response.status(500).json(toObj(response));
         }
-    }
-
-    private static getFileType(fileBuffer: Buffer): string {
-        const magicNumber: string = fileBuffer.toString("hex",0,8).toUpperCase()
-
-        if(magicNumber == "89504E470D0A1A0A") {
-            return "png"
-        }
-
-        if(magicNumber.slice(0, 6) == "FFD8FF") {
-            return "jpg"
-        }
-
-        if(magicNumber.slice(0, 8) == "47494638") {
-            return "gif"
-        }
-
-        return "invalid"
-    }
-
-    private static hashFile(fileBuffer: Buffer): string {
-        const hashSum = crypto.createHash('SHA256')
-        hashSum.update(fileBuffer)
-
-        return hashSum.digest('hex')
     }
 }
 
