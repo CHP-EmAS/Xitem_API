@@ -19,7 +19,6 @@ import { EventModel } from "../models/Event";
 import { NoteModel } from "../models/Notes";
 import MailController from "./mailController";
 import UploadHandler, {FileType} from "../middlewares/uploadHandler";
-import * as buffer from "buffer";
 
 class UserController {
 
@@ -136,8 +135,8 @@ class UserController {
         const userPayload: LocalPayloadInterface = response.locals.userPayload;
 
         if(!userPayload) {
-        console.error("Controller Error: Missing userPayload");
-        return response.status(500).json(toObj(response));
+            console.error("Controller Error: Missing userPayload");
+            return response.status(500).json(toObj(response));
         }
 
         //get and validate user_id given in path
@@ -167,10 +166,11 @@ class UserController {
         return response.status(200).json(toObj(response));
 
         } catch ( error ) {
-        console.error(error);
-        return response.status(500).json(toObj(response));
+            console.error(error);
+            return response.status(500).json(toObj(response));
         }
     }
+
     public static async accountDeletion(request: Request, response: Response) {
         const requestParams: AccountDeletionInterface = request.body;
 
@@ -349,16 +349,14 @@ class UserController {
 
             //set Paths
             const picturePath: string = path.join(process.cwd(), "static", "images", "profile_pictures", user_id);
-            const defaultPath: string = path.join(process.cwd(), "static", "images", "default-profile.png");
+            //const defaultPath: string = path.join(process.cwd(), "static", "images", "default-profile.png");
 
-            if (filesystem.existsSync(picturePath)) {
-                response.status(200).sendFile(picturePath);
-            } else if (filesystem.existsSync(defaultPath)) {
-                response.status(200).sendFile(defaultPath);
-            } else {
-                console.error("Error: No default profile_picture was found in '" + defaultPath + "'!");
-                response.status(500).json(toObj(response));
+            if (!filesystem.existsSync(picturePath)) {
+                console.info("No profile picture was found in '" + picturePath + "'!");
+                response.status(404).json(toObj(response));
             }
+
+            return response.status(200).sendFile(picturePath);
         } catch ( error ) {
             console.log(error);
             return response.status(500).json(toObj(response));

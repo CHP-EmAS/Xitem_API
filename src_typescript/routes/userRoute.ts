@@ -12,20 +12,20 @@ import UploadHandler from "../middlewares/uploadHandler"
 const router = Router({ mergeParams: true })
 
 //user instance routes
-router.get("/", [authProtected, validatePathParameter], UserController.getUserInfo)
-router.patch("/", [authProtected, validatePathParameter], UserController.patchUser)
-router.delete("/", [authProtected, validatePathParameter, RoleCheck.isEqualTo([Roles.SystemAdministrator])], UserController.deleteUserByAdmin)
+router.get("/", [validatePathParameter], UserController.getUserInfo)
+router.patch("/", [validatePathParameter], UserController.patchUser)
+router.delete("/", [validatePathParameter, RoleCheck.isEqualTo([Roles.SystemAdministrator])], UserController.deleteUserByAdmin)
 
 //send account deletion mail
-router.post("/deletion_request", [authProtected, highSecurity, validatePathParameter], UserController.requestAccountDeletion)
+router.post("/deletion_request", [highSecurity, validatePathParameter], UserController.requestAccountDeletion)
 
 //user calendar instances
-router.get("/calendars", [authProtected, validatePathParameter], UserController.getAssociatedCalendars)
+router.get("/calendars", [validatePathParameter], UserController.getAssociatedCalendars)
 
-router.post("/infomail", [authProtected, validatePathParameter], UserController.generateUserInformationEmail)
+router.post("/infomail", [validatePathParameter], UserController.generateUserInformationEmail)
 
 //user avatar routes
-router.put("/avatar", [authProtected, validatePathParameter], UserController.changeProfilePicture)
+router.put("/avatar", [validatePathParameter], UserController.changeProfilePicture)
 router.get("/avatar", [validatePathParameter], UserController.getProfilePicture)
 
 export default router

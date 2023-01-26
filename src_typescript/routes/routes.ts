@@ -22,7 +22,7 @@ routes.use("/auth", auth);
 routes.use("/user/:user_id", user);
 
 //delete account via deltion key
-routes.delete("/user", UserController.accountDeletion)
+routes.delete("/user", [authProtected], UserController.accountDeletion)
 
 routes.use("/calendar", [authProtected], calendar);
 routes.post("/invitation", [authProtected, RoleCheck.compare(Comparisons.isGreaterOrEqualThan, Roles.Verified)], CalendarController.verifyInvitationToken);
