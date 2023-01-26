@@ -300,13 +300,13 @@ class UserController {
             if( error instanceof MulterError ) {
                 console.error(error);
                 if(error.code == "LIMIT_FILE_SIZE") {
-                    return response.status(413).json(toObj(response, {Error: customError.payloadTooLarge}));
-                } else if (error.code == "LIMIT_UNEXPECTED_FILE") {
-                    return response.status(400).json(toObj(response, {Error: customError.invalidFile}));
+                    return response.status(413).json(toObj(response, {Error: customError.payloadTooLarge}))
                 }
+
+                return response.status(400).json(toObj(response, {Error: customError.invalidFile}))
             } else if( error instanceof Error) {
                 console.error(error);
-                return response.status(500).json(toObj(response));
+                return response.status(500).json(toObj(response))
             }
 
             if(!request.file || !user) {
@@ -314,7 +314,7 @@ class UserController {
                 return response.status(500).json(toObj(response))
             }
 
-            console.log("User <" + user_to_patch + "> uploaded Avatar. Size: " + Number(request.file.size / 1000000).toFixed(2) + "MB.")
+            console.log("User <" + user_to_patch + "> uploaded Avatar. Size: " + Number(request.file.size / 1000).toFixed(2) + "KB.")
 
             const fileType: FileType = UploadHandler.getFileType(request.file.buffer)
             if(fileType == FileType.INVALID) {
