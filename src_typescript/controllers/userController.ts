@@ -1,6 +1,6 @@
-import { Request, Response } from "express";
+import {Request, Response} from "express";
 
-import { MulterError } from 'multer';
+import {MulterError} from 'multer';
 import path from 'path';
 import * as filesystem from 'fs';
 import jwt from "jsonwebtoken";
@@ -8,15 +8,21 @@ import jwt from "jsonwebtoken";
 import toObj from "../config/responseStandart"
 import * as customError from "../config/errorCodes"
 
-import { LocalPayloadInterface, EditUserInterface, AssociatedCalendarInterface, JWTAccountDeletionInterface, AccountDeletionInterface } from "../validation/interfaces"
-import { accountDeletionSchema, patchUserSchema } from "../validation/userValidationSchemas";
+import {
+    AccountDeletionInterface,
+    AssociatedCalendarInterface,
+    EditUserInterface,
+    JWTAccountDeletionInterface,
+    LocalPayloadInterface
+} from "../validation/interfaces"
+import {accountDeletionSchema, patchUserSchema} from "../validation/userValidationSchemas";
 
-import { UserModel } from "../models/User";
-import { UserRoleModel } from "../models/UserRole"
-import { CalendarUserLinkModel } from "../models/Calendar_User_lnk"
-import { CalendarModel } from "../models/Calendar";
-import { EventModel } from "../models/Event";
-import { NoteModel } from "../models/Notes";
+import {UserModel} from "../models/User";
+import {UserRoleModel} from "../models/UserRole"
+import {CalendarUserLinkModel} from "../models/Calendar_User_lnk"
+import {CalendarModel} from "../models/Calendar";
+import {EventModel} from "../models/Event";
+import {NoteModel} from "../models/Notes";
 import MailController from "./mailController";
 import UploadHandler, {FileType} from "../middlewares/uploadHandler";
 
@@ -321,10 +327,7 @@ class UserController {
                 return response.status(400).json(toObj(response, {Error: customError.invalidFile}));
             }
 
-            const hexKey: string = UploadHandler.hashFile(request.file.buffer)
-            console.log(fileType + hexKey);
-
-            user.profile_picture_hash = fileType + hexKey;
+            user.profile_picture_hash = fileType + UploadHandler.hashFile(request.file.buffer);
             await user.save().catch((err: Error) => {
                 console.log(err);
                 return response.status(500).json(toObj(response));
@@ -333,7 +336,7 @@ class UserController {
             const destinationPath: string = path.join(process.cwd(), "static", "images", "profile_pictures", user_to_patch)
             filesystem.writeFileSync(destinationPath, request.file.buffer);
 
-            return response.status(200).json(toObj(response))
+            return response.status(200).json(toObj(response,{profile_picture_hash: user.profile_picture_hash}));
         })
     }
 
