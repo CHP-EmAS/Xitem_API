@@ -9,8 +9,7 @@ import crypto from "crypto";
 class UploadHandler {
     public static readonly profilePictureUploadMiddleware = multer({
         storage: multer.memoryStorage(),
-        limits: { fileSize: 1000000 * 3}, //5MB
-        fileFilter: this.profilePictureFileFilter
+        limits: { fileSize: 1000000 * 3} //3MB
     }).single("avatar")
 
     static getFileType(fileBuffer: Buffer): FileType {
@@ -47,16 +46,6 @@ class UploadHandler {
         }
 
         callback(null, user_to_patch);
-    }
-
-    private static profilePictureFileFilter(request: Request, file: Express.Multer.File, callback: multer.FileFilterCallback): void {
-        const extension: string = path.extname(file.originalname);
-
-        if (!(file.mimetype == "image/jpeg" || file.mimetype == "image/png" || file.mimetype == "image/gif")) {
-            return callback(new MulterError("LIMIT_UNEXPECTED_FILE"));
-        }
-
-        callback(null, true);
     }
 }
 
