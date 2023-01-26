@@ -331,7 +331,7 @@ class UserController {
             });
 
             const destinationPath: string = path.join(process.cwd(), "static", "images", "profile_pictures", user_to_patch, ".", fileType.toString())
-            filesystem.writeFileSync(destinationPath, buffer);
+            filesystem.writeFileSync(destinationPath, request.file.buffer);
 
             return response.status(200).json(toObj(response))
         })
